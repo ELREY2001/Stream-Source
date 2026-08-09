@@ -61,9 +61,35 @@
   .wa-link:hover { text-decoration: underline; }
   .spinner { width: 24px; height: 24px; border: 3px solid #2a2a2a; border-top-color: #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; }
   @keyframes spin { to { transform: rotate(360deg); } }
+  .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+  .login-card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; padding: 2.5rem; width: 100%; max-width: 380px; text-align: center; }
+  .login-icon { font-size: 48px; margin-bottom: 1rem; }
+  .login-title { font-size: 22px; font-weight: 700; margin-bottom: 0.5rem; }
+  .login-sub { font-size: 13px; color: #6b7280; margin-bottom: 2rem; }
+  .login-input { width: 100%; padding: 13px 16px; background: #111; border: 1px solid #2a2a2a; border-radius: 10px; font-size: 15px; color: #fff; font-family: inherit; outline: none; transition: border-color 0.15s; margin-bottom: 1rem; text-align: center; letter-spacing: 0.1em; }
+  .login-input:focus { border-color: #6366f1; }
+  .login-input::placeholder { color: #4b5563; letter-spacing: 0; }
+  .login-btn { width: 100%; padding: 13px; background: #6366f1; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+  .login-btn:hover { background: #4f46e5; }
+  .login-error { font-size: 13px; color: #f87171; margin-top: 0.75rem; display: none; }
 </style>
 </head>
 <body>
+
+<!-- Écran de connexion -->
+<div class="login-wrap" id="login-screen">
+  <div class="login-card">
+    <div class="login-icon">🔐</div>
+    <div class="login-title">Espace Admin</div>
+    <div class="login-sub">Stream Source — Accès restreint</div>
+    <input type="password" class="login-input" id="password-input" placeholder="Mot de passe..." onkeydown="if(event.key==='Enter') checkPassword()" />
+    <button class="login-btn" onclick="checkPassword()">Accéder →</button>
+    <div class="login-error" id="login-error">❌ Mot de passe incorrect</div>
+  </div>
+</div>
+
+<!-- Contenu Admin (caché jusqu'à connexion) -->
+<div id="admin-content" style="display:none;">
 <div class="wrap">
   <div class="admin-header">
     <div class="admin-title">🎬 Stream Source <span>— Admin</span></div>
@@ -272,6 +298,28 @@ function exportCSV() {
 
 loadData();
 setInterval(loadData, 10000);
+
+function checkPassword() {
+  const input = document.getElementById('password-input').value;
+  const error = document.getElementById('login-error');
+  if (input === '100200#') {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-content').style.display = 'block';
+    sessionStorage.setItem('ss_admin', 'true');
+  } else {
+    error.style.display = 'block';
+    document.getElementById('password-input').value = '';
+    document.getElementById('password-input').focus();
+    setTimeout(() => error.style.display = 'none', 3000);
+  }
+}
+
+// Vérifier si déjà connecté dans cette session
+if (sessionStorage.getItem('ss_admin') === 'true') {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('admin-content').style.display = 'block';
+}
 </script>
+</div> <!-- fin admin-content -->
 </body>
 </html>
