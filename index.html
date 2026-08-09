@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Stream Source — Rejoins le groupe privé</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f0f; color: #fff; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem; }
@@ -27,9 +28,9 @@
   input[type="text"], input[type="tel"] { width: 100%; padding: 13px 16px; background: #111; border: 1px solid #2a2a2a; border-radius: 10px; font-size: 15px; color: #fff; font-family: inherit; outline: none; transition: border-color 0.15s; }
   input:focus { border-color: #6366f1; }
   input::placeholder { color: #4b5563; }
-  .btn { width: 100%; padding: 15px; background: #6366f1; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 1rem; transition: all 0.15s; font-family: inherit; letter-spacing: 0.01em; }
+  .btn { width: 100%; padding: 15px; background: #6366f1; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 1rem; transition: all 0.15s; font-family: inherit; }
   .btn:hover { background: #4f46e5; transform: translateY(-1px); }
-  .btn:active { transform: translateY(0); }
+  .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
   .step { display: none; }
   .step.active { display: block; }
   .closed-card { text-align: center; padding: 3rem 2rem; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; }
@@ -45,6 +46,9 @@
   .wa-note { font-size: 12px; color: #4b5563; margin-top: 1rem; }
   .counter { font-size: 12px; color: #4b5563; text-align: center; margin-bottom: 1.5rem; }
   .counter span { color: #6366f1; font-weight: 600; }
+  .loading { text-align: center; padding: 3rem; color: #4b5563; }
+  .spinner { width: 32px; height: 32px; border: 3px solid #2a2a2a; border-top-color: #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1rem; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -58,7 +62,12 @@
   <div class="counter" id="counter"></div>
   <div class="progress-bar"><div class="progress-fill" id="progress" style="width:12.5%"></div></div>
 
-  <div class="step active" id="step-closed-check"></div>
+  <div class="step active" id="step-loading">
+    <div class="loading">
+      <div class="spinner"></div>
+      Chargement...
+    </div>
+  </div>
 
   <div class="step" id="step-closed">
     <div class="closed-card">
@@ -168,7 +177,7 @@
       </div>
       <input type="tel" id="whatsapp" placeholder="Ton numéro WhatsApp..." style="margin-top:1rem;" />
     </div>
-    <button class="btn" onclick="submitForm()">Rejoindre Stream Source 🚀</button>
+    <button class="btn" id="btn-submit" onclick="submitForm()">Rejoindre Stream Source 🚀</button>
   </div>
 
   <div class="step" id="step-success">
@@ -186,33 +195,35 @@
 </div>
 
 <script>
+const SUPABASE_URL = 'https://vmggidzgzkbgrmyjllzv.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtZ2dpZHpnemtiZ3JteWpsbHp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyNzQzMTcsImV4cCI6MjEwMTg1MDMxN30.jRg4e9TlYrHgJUljT68i0aCtkYMZ8uMb3p5Itu3DpdE';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 let prenom = '';
 let currentStep = 1;
 const answers = {};
 
-function getConfig() {
-  return JSON.parse(localStorage.getItem('ss_config') || '{"limit":30,"active":true}');
-}
+async function checkAvailability() {
+  try {
+    const { data: config } = await sb.from('config').select('*').eq('id', 1).single();
+    const { count } = await sb.from('reponses').select('*', { count: 'exact', head: true });
 
-function getResponses() {
-  return JSON.parse(localStorage.getItem('ss_responses') || '[]');
-}
+    document.getElementById('step-loading').classList.remove('active');
 
-function checkAvailability() {
-  const config = getConfig();
-  const responses = getResponses();
-  const remaining = config.limit - responses.length;
-  document.getElementById('step-closed-check').classList.remove('active');
+    if (!config.active || count >= config.limite) {
+      document.getElementById('step-closed').classList.add('active');
+      document.getElementById('progress').style.width = '100%';
+      return;
+    }
 
-  if (!config.active || responses.length >= config.limit) {
-    document.getElementById('step-closed').classList.add('active');
-    document.getElementById('progress').style.width = '100%';
-    return;
+    const remaining = config.limite - count;
+    document.getElementById('badge').textContent = remaining + ' place' + (remaining > 1 ? 's' : '') + ' restante' + (remaining > 1 ? 's' : '');
+    document.getElementById('counter').innerHTML = '<span>' + count + '</span> / ' + config.limite + ' personnes inscrites';
+    document.getElementById('step-1').classList.add('active');
+  } catch (e) {
+    document.getElementById('step-loading').classList.remove('active');
+    document.getElementById('step-1').classList.add('active');
   }
-
-  document.getElementById('badge').textContent = remaining + ' place' + (remaining > 1 ? 's' : '') + ' restante' + (remaining > 1 ? 's' : '');
-  document.getElementById('counter').innerHTML = '<span>' + responses.length + '</span> / ' + config.limit + ' personnes inscrites';
-  document.getElementById('step-1').classList.add('active');
 }
 
 function nextStep(step) {
@@ -237,40 +248,45 @@ function selectOption(el, group) {
   answers[group] = el.querySelector('.option-text').textContent;
 }
 
-function submitForm() {
+async function submitForm() {
   const tel = document.getElementById('whatsapp').value.trim();
   if (!tel) { document.getElementById('whatsapp').focus(); return; }
 
-  const config = getConfig();
-  const responses = getResponses();
+  const btn = document.getElementById('btn-submit');
+  btn.disabled = true;
+  btn.textContent = 'Envoi en cours...';
 
-  if (responses.length >= config.limit) {
+  try {
+    const { data: config } = await sb.from('config').select('*').eq('id', 1).single();
+    const { count } = await sb.from('reponses').select('*', { count: 'exact', head: true });
+
+    if (!config.active || count >= config.limite) {
+      document.getElementById('step-8').classList.remove('active');
+      document.getElementById('step-closed').classList.add('active');
+      return;
+    }
+
+    await sb.from('reponses').insert({
+      prenom: prenom,
+      whatsapp: tel,
+      q2: answers.q2 || '',
+      q3: answers.q3 || '',
+      q4: answers.q4 || '',
+      q5: answers.q5 || '',
+      q6: answers.q6 || '',
+      q7: answers.q7 || '',
+      q8: answers.q8 || ''
+    });
+
     document.getElementById('step-8').classList.remove('active');
-    document.getElementById('step-closed').classList.add('active');
-    return;
+    document.getElementById('step-success').classList.add('active');
+    document.getElementById('progress').style.width = '100%';
+    window.scrollTo(0, 0);
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = 'Rejoindre Stream Source 🚀';
+    alert('Une erreur est survenue, réessaie.');
   }
-
-  const entry = {
-    id: Date.now(),
-    date: new Date().toLocaleString('fr-FR'),
-    prenom: prenom,
-    whatsapp: tel,
-    q2: answers.q2 || '',
-    q3: answers.q3 || '',
-    q4: answers.q4 || '',
-    q5: answers.q5 || '',
-    q6: answers.q6 || '',
-    q7: answers.q7 || '',
-    q8: answers.q8 || ''
-  };
-
-  responses.push(entry);
-  localStorage.setItem('ss_responses', JSON.stringify(responses));
-
-  document.getElementById('step-8').classList.remove('active');
-  document.getElementById('step-success').classList.add('active');
-  document.getElementById('progress').style.width = '100%';
-  window.scrollTo(0, 0);
 }
 
 checkAvailability();
