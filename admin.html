@@ -4,10 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Stream Source — Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0a; color: #fff; min-height: 100vh; padding: 2rem 1rem; }
-  .wrap { max-width: 900px; margin: 0 auto; }
+  .wrap { max-width: 1100px; margin: 0 auto; }
   .admin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
   .admin-title { font-size: 24px; font-weight: 700; }
   .admin-title span { color: #6366f1; }
@@ -18,9 +19,8 @@
   .stat-value { font-size: 28px; font-weight: 700; color: #fff; }
   .stat-value.accent { color: #6366f1; }
   .stat-value.green { color: #34d399; }
-  .stat-value.red { color: #f87171; }
   .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
-  .section-title { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px; }
+  .section-title { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
   .controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
   .limit-input { padding: 10px 14px; background: #111; border: 1px solid #2a2a2a; border-radius: 8px; font-size: 15px; color: #fff; font-family: inherit; outline: none; width: 100px; transition: border-color 0.15s; }
   .limit-input:focus { border-color: #6366f1; }
@@ -33,6 +33,7 @@
   .btn-danger:hover { background: #b91c1c; }
   .btn-outline { background: transparent; color: #9ca3af; border: 1px solid #2a2a2a; }
   .btn-outline:hover { border-color: #6366f1; color: #818cf8; }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
   .toggle-wrap { display: flex; align-items: center; gap: 10px; }
   .toggle { position: relative; width: 44px; height: 24px; }
   .toggle input { opacity: 0; width: 0; height: 0; }
@@ -50,27 +51,22 @@
   .empty { text-align: center; padding: 3rem; color: #4b5563; font-size: 14px; }
   .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
   .tag-blue { background: rgba(99,102,241,0.15); color: #818cf8; }
-  .tag-green { background: rgba(52,211,153,0.15); color: #34d399; }
-  .tag-orange { background: rgba(251,146,60,0.15); color: #fb923c; }
   .progress-mini { height: 6px; background: #2a2a2a; border-radius: 3px; margin-top: 0.5rem; }
   .progress-mini-fill { height: 100%; background: #6366f1; border-radius: 3px; transition: width 0.3s; }
   .alert { padding: 12px 16px; border-radius: 8px; font-size: 13px; margin-bottom: 1rem; }
   .alert-success { background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.3); color: #34d399; }
   .alert-danger { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #f87171; }
   #alert-box { display: none; }
-  .btn-sm { padding: 5px 10px; font-size: 12px; }
   .wa-link { color: #34d399; text-decoration: none; }
   .wa-link:hover { text-decoration: underline; }
-  .export-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .spinner { width: 24px; height: 24px; border: 3px solid #2a2a2a; border-top-color: #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
 <div class="wrap">
-
   <div class="admin-header">
-    <div>
-      <div class="admin-title">🎬 Stream Source <span>— Admin</span></div>
-    </div>
+    <div class="admin-title">🎬 Stream Source <span>— Admin</span></div>
     <span class="badge-admin">🔒 Espace privé</span>
   </div>
 
@@ -79,37 +75,35 @@
   <div class="stats">
     <div class="stat-card">
       <div class="stat-label">Inscrits</div>
-      <div class="stat-value accent" id="stat-inscrits">0</div>
-      <div class="progress-mini"><div class="progress-mini-fill" id="progress-mini"></div></div>
+      <div class="stat-value accent" id="stat-inscrits">—</div>
+      <div class="progress-mini"><div class="progress-mini-fill" id="progress-mini" style="width:0%"></div></div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Limite actuelle</div>
-      <div class="stat-value" id="stat-limit">30</div>
+      <div class="stat-value" id="stat-limit">—</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Places restantes</div>
-      <div class="stat-value green" id="stat-remaining">30</div>
+      <div class="stat-value green" id="stat-remaining">—</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Statut formulaire</div>
-      <div class="stat-value" id="stat-status">—</div>
+      <div class="stat-value" id="stat-status" style="font-size:16px;">—</div>
     </div>
   </div>
 
   <div class="section">
     <div class="section-title">⚙️ Paramètres</div>
-    <div class="controls" style="gap: 16px; flex-direction: column; align-items: flex-start;">
-
-      <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-        <span style="font-size:14px; color:#9ca3af;">Limite de réponses :</span>
-        <input type="number" class="limit-input" id="limit-input" min="1" max="9999" value="30" />
+    <div style="display:flex; flex-direction:column; gap:16px;">
+      <div class="controls">
+        <span style="font-size:14px;color:#9ca3af;">Limite :</span>
+        <input type="number" class="limit-input" id="limit-input" min="1" value="30" />
         <button class="btn btn-primary" onclick="saveLimit()">Enregistrer</button>
         <button class="btn btn-outline" onclick="adjustLimit(-5)">−5</button>
-        <button class="btn btn-outline" onclick="adjustLimit(+5)">+5</button>
         <button class="btn btn-outline" onclick="adjustLimit(-1)">−1</button>
         <button class="btn btn-outline" onclick="adjustLimit(+1)">+1</button>
+        <button class="btn btn-outline" onclick="adjustLimit(+5)">+5</button>
       </div>
-
       <div class="toggle-wrap">
         <label class="toggle">
           <input type="checkbox" id="active-toggle" onchange="toggleActive()" checked />
@@ -117,20 +111,20 @@
         </label>
         <span class="toggle-label" id="toggle-label">Formulaire actif</span>
       </div>
-
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title" style="justify-content:space-between;">
+    <div class="section-title">
       <span>📋 Réponses reçues (<span id="count-label">0</span>)</span>
-      <div class="export-row">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <button class="btn btn-success btn-sm" onclick="exportCSV()">Exporter CSV</button>
         <button class="btn btn-danger btn-sm" onclick="clearAll()">Tout effacer</button>
+        <button class="btn btn-outline btn-sm" onclick="loadData()">🔄 Actualiser</button>
       </div>
     </div>
     <div class="table-wrap">
-      <table id="responses-table">
+      <table>
         <thead>
           <tr>
             <th>#</th>
@@ -138,34 +132,30 @@
             <th>Prénom</th>
             <th>WhatsApp</th>
             <th>Dépenses</th>
-            <th>Coupé abo ?</th>
+            <th>Coupé abo</th>
             <th>Intérêt prix</th>
-            <th>Business ?</th>
+            <th>Business</th>
             <th>Statut social</th>
-            <th>Entourage ?</th>
-            <th>Prêt ?</th>
+            <th>Entourage</th>
+            <th>Prêt</th>
             <th>Action</th>
           </tr>
         </thead>
         <tbody id="responses-body">
-          <tr><td colspan="12" class="empty">Aucune réponse pour le moment</td></tr>
+          <tr><td colspan="12" class="empty"><div class="spinner"></div></td></tr>
         </tbody>
       </table>
     </div>
   </div>
-
 </div>
 
 <script>
-function getConfig() {
-  return JSON.parse(localStorage.getItem('ss_config') || '{"limit":30,"active":true}');
-}
-function saveConfig(config) {
-  localStorage.setItem('ss_config', JSON.stringify(config));
-}
-function getResponses() {
-  return JSON.parse(localStorage.getItem('ss_responses') || '[]');
-}
+const SUPABASE_URL = 'https://vmggidzgzkbgrmyjllzv.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtZ2dpZHpnemtiZ3JteWpsbHp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyNzQzMTcsImV4cCI6MjEwMTg1MDMxN30.jRg4e9TlYrHgJUljT68i0aCtkYMZ8uMb3p5Itu3DpdE';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentConfig = { limite: 30, active: true };
+let currentResponses = [];
 
 function showAlert(msg, type) {
   const box = document.getElementById('alert-box');
@@ -175,39 +165,47 @@ function showAlert(msg, type) {
   setTimeout(() => box.style.display = 'none', 3000);
 }
 
-function refreshStats() {
-  const config = getConfig();
-  const responses = getResponses();
-  const remaining = Math.max(0, config.limit - responses.length);
-  const pct = config.limit > 0 ? Math.min(100, Math.round((responses.length / config.limit) * 100)) : 0;
+async function loadData() {
+  try {
+    const { data: config } = await sb.from('config').select('*').eq('id', 1).single();
+    const { data: responses, count } = await sb.from('reponses').select('*', { count: 'exact' }).order('date', { ascending: false });
 
-  document.getElementById('stat-inscrits').textContent = responses.length;
-  document.getElementById('stat-limit').textContent = config.limit;
-  document.getElementById('stat-remaining').textContent = remaining;
-  document.getElementById('stat-status').textContent = config.active ? (responses.length >= config.limit ? '🔴 Complet' : '🟢 Ouvert') : '🔴 Fermé';
-  document.getElementById('stat-status').style.fontSize = '16px';
-  document.getElementById('progress-mini').style.width = pct + '%';
-  document.getElementById('limit-input').value = config.limit;
-  document.getElementById('active-toggle').checked = config.active;
-  document.getElementById('toggle-label').textContent = config.active ? 'Formulaire actif' : 'Formulaire désactivé';
-  document.getElementById('count-label').textContent = responses.length;
+    currentConfig = config;
+    currentResponses = responses || [];
 
-  renderTable(responses);
+    const total = count || 0;
+    const remaining = Math.max(0, config.limite - total);
+    const pct = config.limite > 0 ? Math.min(100, Math.round((total / config.limite) * 100)) : 0;
+
+    document.getElementById('stat-inscrits').textContent = total;
+    document.getElementById('stat-limit').textContent = config.limite;
+    document.getElementById('stat-remaining').textContent = remaining;
+    document.getElementById('stat-status').textContent = config.active ? (total >= config.limite ? '🔴 Complet' : '🟢 Ouvert') : '🔴 Fermé';
+    document.getElementById('progress-mini').style.width = pct + '%';
+    document.getElementById('limit-input').value = config.limite;
+    document.getElementById('active-toggle').checked = config.active;
+    document.getElementById('toggle-label').textContent = config.active ? 'Formulaire actif' : 'Formulaire désactivé';
+    document.getElementById('count-label').textContent = total;
+
+    renderTable(currentResponses);
+  } catch (e) {
+    showAlert('Erreur de chargement', 'danger');
+  }
 }
 
 function renderTable(responses) {
   const tbody = document.getElementById('responses-body');
-  if (responses.length === 0) {
+  if (!responses || responses.length === 0) {
     tbody.innerHTML = '<tr><td colspan="12" class="empty">Aucune réponse pour le moment</td></tr>';
     return;
   }
   tbody.innerHTML = responses.map((r, i) => `
     <tr>
       <td><span class="tag tag-blue">${i + 1}</span></td>
-      <td style="color:#6b7280;white-space:nowrap;">${r.date}</td>
-      <td style="font-weight:600;">${r.prenom}</td>
-      <td><a class="wa-link" href="https://wa.me/${r.whatsapp.replace(/\D/g,'')}" target="_blank">${r.whatsapp}</a></td>
-      <td style="max-width:120px;font-size:12px;">${r.q2 || '—'}</td>
+      <td style="color:#6b7280;white-space:nowrap;font-size:12px;">${new Date(r.date).toLocaleString('fr-FR')}</td>
+      <td style="font-weight:600;">${r.prenom || '—'}</td>
+      <td><a class="wa-link" href="https://wa.me/${(r.whatsapp||'').replace(/\D/g,'')}" target="_blank">${r.whatsapp || '—'}</a></td>
+      <td style="font-size:12px;max-width:100px;">${r.q2 || '—'}</td>
       <td style="font-size:12px;">${r.q3 || '—'}</td>
       <td style="font-size:12px;">${r.q4 || '—'}</td>
       <td style="font-size:12px;">${r.q5 || '—'}</td>
@@ -219,54 +217,50 @@ function renderTable(responses) {
   `).join('');
 }
 
-function saveLimit() {
+async function saveLimit() {
   const val = parseInt(document.getElementById('limit-input').value);
   if (isNaN(val) || val < 1) { showAlert('Limite invalide', 'danger'); return; }
-  const config = getConfig();
-  config.limit = val;
-  saveConfig(config);
-  refreshStats();
-  showAlert('Limite mise à jour : ' + val + ' personnes', 'success');
+  await sb.from('config').update({ limite: val }).eq('id', 1);
+  showAlert('Limite mise à jour : ' + val, 'success');
+  loadData();
 }
 
-function adjustLimit(delta) {
-  const config = getConfig();
-  const newVal = Math.max(1, config.limit + delta);
-  config.limit = newVal;
-  saveConfig(config);
-  document.getElementById('limit-input').value = newVal;
-  refreshStats();
+async function adjustLimit(delta) {
+  const newVal = Math.max(1, currentConfig.limite + delta);
+  await sb.from('config').update({ limite: newVal }).eq('id', 1);
   showAlert('Limite ajustée à ' + newVal, 'success');
+  loadData();
 }
 
-function toggleActive() {
-  const config = getConfig();
-  config.active = document.getElementById('active-toggle').checked;
-  saveConfig(config);
-  refreshStats();
-  showAlert(config.active ? 'Formulaire activé' : 'Formulaire désactivé', config.active ? 'success' : 'danger');
+async function toggleActive() {
+  const active = document.getElementById('active-toggle').checked;
+  await sb.from('config').update({ active }).eq('id', 1);
+  showAlert(active ? 'Formulaire activé' : 'Formulaire désactivé', active ? 'success' : 'danger');
+  loadData();
 }
 
-function deleteEntry(id) {
+async function deleteEntry(id) {
   if (!confirm('Supprimer cette entrée ?')) return;
-  const responses = getResponses().filter(r => r.id !== id);
-  localStorage.setItem('ss_responses', JSON.stringify(responses));
-  refreshStats();
+  await sb.from('reponses').delete().eq('id', id);
   showAlert('Entrée supprimée', 'success');
+  loadData();
 }
 
-function clearAll() {
-  if (!confirm('Effacer TOUTES les réponses ? Cette action est irréversible.')) return;
-  localStorage.setItem('ss_responses', '[]');
-  refreshStats();
-  showAlert('Toutes les réponses ont été effacées', 'danger');
+async function clearAll() {
+  if (!confirm('Effacer TOUTES les réponses ? Action irréversible.')) return;
+  await sb.from('reponses').delete().neq('id', 0);
+  showAlert('Toutes les réponses effacées', 'danger');
+  loadData();
 }
 
 function exportCSV() {
-  const responses = getResponses();
-  if (responses.length === 0) { showAlert('Aucune réponse à exporter', 'danger'); return; }
+  if (currentResponses.length === 0) { showAlert('Aucune réponse à exporter', 'danger'); return; }
   const headers = ['#','Date','Prénom','WhatsApp','Dépenses','Coupé abo','Intérêt prix','Business','Statut social','Entourage','Prêt'];
-  const rows = responses.map((r, i) => [i+1, r.date, r.prenom, r.whatsapp, r.q2, r.q3, r.q4, r.q5, r.q6, r.q7, r.q8].map(v => '"' + (v||'').replace(/"/g,'""') + '"').join(','));
+  const rows = currentResponses.map((r, i) => [
+    i+1,
+    new Date(r.date).toLocaleString('fr-FR'),
+    r.prenom, r.whatsapp, r.q2, r.q3, r.q4, r.q5, r.q6, r.q7, r.q8
+  ].map(v => '"' + (v||'').toString().replace(/"/g,'""') + '"').join(','));
   const csv = [headers.join(','), ...rows].join('\n');
   const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
@@ -276,8 +270,8 @@ function exportCSV() {
   showAlert('Export CSV téléchargé !', 'success');
 }
 
-refreshStats();
-setInterval(refreshStats, 5000);
+loadData();
+setInterval(loadData, 10000);
 </script>
 </body>
 </html>
