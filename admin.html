@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stream Source — Admin</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0a; color: #fff; min-height: 100vh; padding: 2rem 1rem; }
+  .wrap { max-width: 900px; margin: 0 auto; }
+  .admin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
+  .admin-title { font-size: 24px; font-weight: 700; }
+  .admin-title span { color: #6366f1; }
+  .badge-admin { background: rgba(239,68,68,0.15); color: #f87171; font-size: 11px; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(239,68,68,0.3); }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 2rem; }
+  .stat-card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 1.25rem; }
+  .stat-label { font-size: 12px; color: #6b7280; margin-bottom: 0.4rem; }
+  .stat-value { font-size: 28px; font-weight: 700; color: #fff; }
+  .stat-value.accent { color: #6366f1; }
+  .stat-value.green { color: #34d399; }
+  .stat-value.red { color: #f87171; }
+  .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
+  .section-title { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px; }
+  .controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .limit-input { padding: 10px 14px; background: #111; border: 1px solid #2a2a2a; border-radius: 8px; font-size: 15px; color: #fff; font-family: inherit; outline: none; width: 100px; transition: border-color 0.15s; }
+  .limit-input:focus { border-color: #6366f1; }
+  .btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+  .btn-primary { background: #6366f1; color: #fff; }
+  .btn-primary:hover { background: #4f46e5; }
+  .btn-success { background: #059669; color: #fff; }
+  .btn-success:hover { background: #047857; }
+  .btn-danger { background: #dc2626; color: #fff; }
+  .btn-danger:hover { background: #b91c1c; }
+  .btn-outline { background: transparent; color: #9ca3af; border: 1px solid #2a2a2a; }
+  .btn-outline:hover { border-color: #6366f1; color: #818cf8; }
+  .toggle-wrap { display: flex; align-items: center; gap: 10px; }
+  .toggle { position: relative; width: 44px; height: 24px; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #374151; border-radius: 24px; transition: .3s; }
+  .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: .3s; }
+  input:checked + .slider { background: #6366f1; }
+  input:checked + .slider:before { transform: translateX(20px); }
+  .toggle-label { font-size: 14px; color: #9ca3af; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 10px 12px; color: #6b7280; font-weight: 500; border-bottom: 1px solid #2a2a2a; white-space: nowrap; }
+  td { padding: 12px 12px; border-bottom: 1px solid #1f1f1f; color: #e5e7eb; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #1f1f1f; }
+  .empty { text-align: center; padding: 3rem; color: #4b5563; font-size: 14px; }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+  .tag-blue { background: rgba(99,102,241,0.15); color: #818cf8; }
+  .tag-green { background: rgba(52,211,153,0.15); color: #34d399; }
+  .tag-orange { background: rgba(251,146,60,0.15); color: #fb923c; }
+  .progress-mini { height: 6px; background: #2a2a2a; border-radius: 3px; margin-top: 0.5rem; }
+  .progress-mini-fill { height: 100%; background: #6366f1; border-radius: 3px; transition: width 0.3s; }
+  .alert { padding: 12px 16px; border-radius: 8px; font-size: 13px; margin-bottom: 1rem; }
+  .alert-success { background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.3); color: #34d399; }
+  .alert-danger { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #f87171; }
+  #alert-box { display: none; }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+  .wa-link { color: #34d399; text-decoration: none; }
+  .wa-link:hover { text-decoration: underline; }
+  .export-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="admin-header">
+    <div>
+      <div class="admin-title">🎬 Stream Source <span>— Admin</span></div>
+    </div>
+    <span class="badge-admin">🔒 Espace privé</span>
+  </div>
+
+  <div id="alert-box" class="alert"></div>
+
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-label">Inscrits</div>
+      <div class="stat-value accent" id="stat-inscrits">0</div>
+      <div class="progress-mini"><div class="progress-mini-fill" id="progress-mini"></div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Limite actuelle</div>
+      <div class="stat-value" id="stat-limit">30</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Places restantes</div>
+      <div class="stat-value green" id="stat-remaining">30</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Statut formulaire</div>
+      <div class="stat-value" id="stat-status">—</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚙️ Paramètres</div>
+    <div class="controls" style="gap: 16px; flex-direction: column; align-items: flex-start;">
+
+      <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+        <span style="font-size:14px; color:#9ca3af;">Limite de réponses :</span>
+        <input type="number" class="limit-input" id="limit-input" min="1" max="9999" value="30" />
+        <button class="btn btn-primary" onclick="saveLimit()">Enregistrer</button>
+        <button class="btn btn-outline" onclick="adjustLimit(-5)">−5</button>
+        <button class="btn btn-outline" onclick="adjustLimit(+5)">+5</button>
+        <button class="btn btn-outline" onclick="adjustLimit(-1)">−1</button>
+        <button class="btn btn-outline" onclick="adjustLimit(+1)">+1</button>
+      </div>
+
+      <div class="toggle-wrap">
+        <label class="toggle">
+          <input type="checkbox" id="active-toggle" onchange="toggleActive()" checked />
+          <span class="slider"></span>
+        </label>
+        <span class="toggle-label" id="toggle-label">Formulaire actif</span>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title" style="justify-content:space-between;">
+      <span>📋 Réponses reçues (<span id="count-label">0</span>)</span>
+      <div class="export-row">
+        <button class="btn btn-success btn-sm" onclick="exportCSV()">Exporter CSV</button>
+        <button class="btn btn-danger btn-sm" onclick="clearAll()">Tout effacer</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table id="responses-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Date</th>
+            <th>Prénom</th>
+            <th>WhatsApp</th>
+            <th>Dépenses</th>
+            <th>Coupé abo ?</th>
+            <th>Intérêt prix</th>
+            <th>Business ?</th>
+            <th>Statut social</th>
+            <th>Entourage ?</th>
+            <th>Prêt ?</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="responses-body">
+          <tr><td colspan="12" class="empty">Aucune réponse pour le moment</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function getConfig() {
+  return JSON.parse(localStorage.getItem('ss_config') || '{"limit":30,"active":true}');
+}
+function saveConfig(config) {
+  localStorage.setItem('ss_config', JSON.stringify(config));
+}
+function getResponses() {
+  return JSON.parse(localStorage.getItem('ss_responses') || '[]');
+}
+
+function showAlert(msg, type) {
+  const box = document.getElementById('alert-box');
+  box.className = 'alert alert-' + type;
+  box.textContent = msg;
+  box.style.display = 'block';
+  setTimeout(() => box.style.display = 'none', 3000);
+}
+
+function refreshStats() {
+  const config = getConfig();
+  const responses = getResponses();
+  const remaining = Math.max(0, config.limit - responses.length);
+  const pct = config.limit > 0 ? Math.min(100, Math.round((responses.length / config.limit) * 100)) : 0;
+
+  document.getElementById('stat-inscrits').textContent = responses.length;
+  document.getElementById('stat-limit').textContent = config.limit;
+  document.getElementById('stat-remaining').textContent = remaining;
+  document.getElementById('stat-status').textContent = config.active ? (responses.length >= config.limit ? '🔴 Complet' : '🟢 Ouvert') : '🔴 Fermé';
+  document.getElementById('stat-status').style.fontSize = '16px';
+  document.getElementById('progress-mini').style.width = pct + '%';
+  document.getElementById('limit-input').value = config.limit;
+  document.getElementById('active-toggle').checked = config.active;
+  document.getElementById('toggle-label').textContent = config.active ? 'Formulaire actif' : 'Formulaire désactivé';
+  document.getElementById('count-label').textContent = responses.length;
+
+  renderTable(responses);
+}
+
+function renderTable(responses) {
+  const tbody = document.getElementById('responses-body');
+  if (responses.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="12" class="empty">Aucune réponse pour le moment</td></tr>';
+    return;
+  }
+  tbody.innerHTML = responses.map((r, i) => `
+    <tr>
+      <td><span class="tag tag-blue">${i + 1}</span></td>
+      <td style="color:#6b7280;white-space:nowrap;">${r.date}</td>
+      <td style="font-weight:600;">${r.prenom}</td>
+      <td><a class="wa-link" href="https://wa.me/${r.whatsapp.replace(/\D/g,'')}" target="_blank">${r.whatsapp}</a></td>
+      <td style="max-width:120px;font-size:12px;">${r.q2 || '—'}</td>
+      <td style="font-size:12px;">${r.q3 || '—'}</td>
+      <td style="font-size:12px;">${r.q4 || '—'}</td>
+      <td style="font-size:12px;">${r.q5 || '—'}</td>
+      <td style="font-size:12px;">${r.q6 || '—'}</td>
+      <td style="font-size:12px;">${r.q7 || '—'}</td>
+      <td style="font-size:12px;">${r.q8 || '—'}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteEntry(${r.id})">✕</button></td>
+    </tr>
+  `).join('');
+}
+
+function saveLimit() {
+  const val = parseInt(document.getElementById('limit-input').value);
+  if (isNaN(val) || val < 1) { showAlert('Limite invalide', 'danger'); return; }
+  const config = getConfig();
+  config.limit = val;
+  saveConfig(config);
+  refreshStats();
+  showAlert('Limite mise à jour : ' + val + ' personnes', 'success');
+}
+
+function adjustLimit(delta) {
+  const config = getConfig();
+  const newVal = Math.max(1, config.limit + delta);
+  config.limit = newVal;
+  saveConfig(config);
+  document.getElementById('limit-input').value = newVal;
+  refreshStats();
+  showAlert('Limite ajustée à ' + newVal, 'success');
+}
+
+function toggleActive() {
+  const config = getConfig();
+  config.active = document.getElementById('active-toggle').checked;
+  saveConfig(config);
+  refreshStats();
+  showAlert(config.active ? 'Formulaire activé' : 'Formulaire désactivé', config.active ? 'success' : 'danger');
+}
+
+function deleteEntry(id) {
+  if (!confirm('Supprimer cette entrée ?')) return;
+  const responses = getResponses().filter(r => r.id !== id);
+  localStorage.setItem('ss_responses', JSON.stringify(responses));
+  refreshStats();
+  showAlert('Entrée supprimée', 'success');
+}
+
+function clearAll() {
+  if (!confirm('Effacer TOUTES les réponses ? Cette action est irréversible.')) return;
+  localStorage.setItem('ss_responses', '[]');
+  refreshStats();
+  showAlert('Toutes les réponses ont été effacées', 'danger');
+}
+
+function exportCSV() {
+  const responses = getResponses();
+  if (responses.length === 0) { showAlert('Aucune réponse à exporter', 'danger'); return; }
+  const headers = ['#','Date','Prénom','WhatsApp','Dépenses','Coupé abo','Intérêt prix','Business','Statut social','Entourage','Prêt'];
+  const rows = responses.map((r, i) => [i+1, r.date, r.prenom, r.whatsapp, r.q2, r.q3, r.q4, r.q5, r.q6, r.q7, r.q8].map(v => '"' + (v||'').replace(/"/g,'""') + '"').join(','));
+  const csv = [headers.join(','), ...rows].join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'stream_source_reponses.csv'; a.click();
+  URL.revokeObjectURL(url);
+  showAlert('Export CSV téléchargé !', 'success');
+}
+
+refreshStats();
+setInterval(refreshStats, 5000);
+</script>
+</body>
+</html>

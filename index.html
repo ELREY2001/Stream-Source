@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stream Source — Rejoins le groupe privé</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f0f; color: #fff; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+  .wrap { max-width: 580px; width: 100%; }
+  .header { text-align: center; margin-bottom: 2rem; }
+  .badge { display: inline-block; background: rgba(99,102,241,0.15); color: #818cf8; font-size: 12px; padding: 5px 14px; border-radius: 20px; border: 1px solid rgba(99,102,241,0.3); margin-bottom: 1.2rem; }
+  .header h1 { font-size: 32px; font-weight: 700; background: linear-gradient(135deg, #fff 0%, #818cf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem; }
+  .header p { font-size: 15px; color: #9ca3af; line-height: 1.6; }
+  .progress-bar { height: 4px; background: #1f1f1f; border-radius: 2px; margin-bottom: 2rem; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #6366f1, #818cf8); border-radius: 2px; transition: width 0.4s ease; }
+  .card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; padding: 1.75rem; margin-bottom: 1rem; }
+  .q-num { font-size: 12px; color: #6366f1; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.6rem; }
+  .q-text { font-size: 18px; font-weight: 600; color: #fff; margin-bottom: 0.4rem; line-height: 1.4; }
+  .q-sub { font-size: 13px; color: #6b7280; margin-bottom: 1.2rem; }
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .option { display: flex; align-items: center; gap: 12px; padding: 13px 16px; background: #111; border: 1px solid #2a2a2a; border-radius: 10px; cursor: pointer; transition: all 0.15s; }
+  .option:hover { border-color: #6366f1; background: rgba(99,102,241,0.08); }
+  .option.selected { border-color: #6366f1; background: rgba(99,102,241,0.12); }
+  .option-emoji { font-size: 20px; width: 28px; text-align: center; }
+  .option-text { font-size: 14px; color: #e5e7eb; }
+  input[type="text"], input[type="tel"] { width: 100%; padding: 13px 16px; background: #111; border: 1px solid #2a2a2a; border-radius: 10px; font-size: 15px; color: #fff; font-family: inherit; outline: none; transition: border-color 0.15s; }
+  input:focus { border-color: #6366f1; }
+  input::placeholder { color: #4b5563; }
+  .btn { width: 100%; padding: 15px; background: #6366f1; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 1rem; transition: all 0.15s; font-family: inherit; letter-spacing: 0.01em; }
+  .btn:hover { background: #4f46e5; transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+  .step { display: none; }
+  .step.active { display: block; }
+  .closed-card { text-align: center; padding: 3rem 2rem; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; }
+  .closed-icon { font-size: 52px; margin-bottom: 1rem; }
+  .closed-title { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 0.75rem; }
+  .closed-text { font-size: 14px; color: #9ca3af; line-height: 1.6; }
+  .success-card { text-align: center; padding: 2.5rem 2rem; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; }
+  .success-icon { font-size: 52px; margin-bottom: 1rem; }
+  .success-title { font-size: 24px; font-weight: 700; color: #fff; margin-bottom: 0.75rem; }
+  .success-text { font-size: 14px; color: #9ca3af; line-height: 1.6; margin-bottom: 1.75rem; }
+  .btn-wa { display: inline-flex; align-items: center; gap: 10px; padding: 15px 30px; background: #25D366; color: #fff; border-radius: 10px; font-size: 15px; font-weight: 600; text-decoration: none; transition: all 0.15s; }
+  .btn-wa:hover { background: #1ebe5d; transform: translateY(-1px); }
+  .wa-note { font-size: 12px; color: #4b5563; margin-top: 1rem; }
+  .counter { font-size: 12px; color: #4b5563; text-align: center; margin-bottom: 1.5rem; }
+  .counter span { color: #6366f1; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="badge" id="badge">Groupe privé — places limitées</div>
+    <h1>🎬 Stream Source</h1>
+    <p>Réponds à quelques questions pour rejoindre le groupe privé et découvrir comment accéder à toutes tes plateformes à prix mini.</p>
+  </div>
+
+  <div class="counter" id="counter"></div>
+  <div class="progress-bar"><div class="progress-fill" id="progress" style="width:12.5%"></div></div>
+
+  <div class="step active" id="step-closed-check"></div>
+
+  <div class="step" id="step-closed">
+    <div class="closed-card">
+      <div class="closed-icon">🔒</div>
+      <div class="closed-title">Le groupe est complet !</div>
+      <div class="closed-text">Toutes les places ont été prises.<br>Reste à l'affût pour la prochaine ouverture.</div>
+    </div>
+  </div>
+
+  <div class="step" id="step-1">
+    <div class="card">
+      <div class="q-num">Question 1 sur 8</div>
+      <div class="q-text">Avant tout, dis-moi qui tu es !</div>
+      <input type="text" id="prenom" placeholder="Ton prénom..." />
+    </div>
+    <button class="btn" onclick="nextStep(1)">Continuer →</button>
+  </div>
+
+  <div class="step" id="step-2">
+    <div class="card">
+      <div class="q-num">Question 2 sur 8</div>
+      <div class="q-text" id="q2-title">Combien tu claques par mois en abonnements streaming ?</div>
+      <div class="q-sub">Netflix, Prime Video, Spotify, Canva...</div>
+      <div class="options">
+        <div class="option" onclick="selectOption(this,'q2')"><span class="option-emoji">😐</span><span class="option-text">Moins de 5 000 FCFA</span></div>
+        <div class="option" onclick="selectOption(this,'q2')"><span class="option-emoji">😬</span><span class="option-text">Entre 5 000 et 15 000 FCFA</span></div>
+        <div class="option" onclick="selectOption(this,'q2')"><span class="option-emoji">😩</span><span class="option-text">Plus de 15 000 FCFA</span></div>
+        <div class="option" onclick="selectOption(this,'q2')"><span class="option-emoji">😔</span><span class="option-text">Pas d'abonnement, trop cher pour moi</span></div>
+      </div>
+    </div>
+    <button class="btn" onclick="nextStep(2)">Continuer →</button>
+  </div>
+
+  <div class="step" id="step-3">
+    <div class="card">
+      <div class="q-num">Question 3 sur 8</div>
+      <div class="q-text">Tu as déjà refusé ou coupé un abonnement à cause du prix ?</div>
+      <div class="options">
+        <div class="option" onclick="selectOption(this,'q3')"><span class="option-emoji">🔴</span><span class="option-text">Oui souvent, c'est frustrant</span></div>
+        <div class="option" onclick="selectOption(this,'q3')"><span class="option-emoji">🟡</span><span class="option-text">Oui parfois ça arrive</span></div>
+        <div class="option" onclick="selectOption(this,'q3')"><span class="option-emoji">🟢</span><span class="option-text">Non jamais, je gère</span></div>
+      </div>
+    </div>
+    <button class="btn" onclick="nextStep(3)">Continuer →</button>
+  </div>
+
+  <div class="step" id="step-4">
+    <div class="card">
+      <div class="q-num">Question 4 sur 8</div>
+      <div class="q-text">Et si tu pouvais accéder à Netflix, Prime Video, Spotify à moins de 1 000 FCFA par mois ?</div>
+      <div class="options">
+        <div class="option" onclick="selectOption(this,'q4')"><span class="option-emoji">🤩</span><span class="option-text">Montre moi comment, je veux savoir maintenant !</span></div>
+        <div class="option" onclick="selectOption(this,'q4')"><span class="option-emoji">🤔</span><span class="option-text">Intéressant... dis m'en plus</span></div>
+        <div class="option" onclick="selectOption(this,'q4')"><span class="option-emoji">😐</span><span class="option-text">J'attends de voir</span></div>
+      </div>
+    </div>
+    <button class="btn" onclick="nextStep(4)">Continuer →</button>
+  </div>
+
+  <div class="step" id="step-5">
+    <div class="card">
+      <div class="q-num">Question 5 sur 8</div>
+      <div class="q-text">Et si en plus tu pouvais revendre des accès et gagner de l'argent ?</div>
+      <div class="options">
+        <div class="option" onclick="selectOption(this,'q5')"><span class="option-emoji">🚀</span><span class="option-text">Oui je veux les deux : économiser ET gagner !</span></div>
+        <div class="option" onclick="selectOption(this,'q5')"><span class="option-emoji">💡</span><span class="option-text">Pourquoi pas, je suis curieux</span></div>
+        <div class="option" onclick="selectOption(this,'q5')"><span class="option-emoji">🎯</span><span class="option-text">Non merci, juste économiser me suffit</span></div>
+      </div>
+    </div>
+    <button class="btn" onclick="nextStep(5)">Continuer →</button>
+  </div>
+
+  <div class="step" id="step-6">
+    <div class="card">
+      <div class="q-num">Question 6 sur 8</div>
+      <div class="q-text">Dans ton cercle, tu es plutôt quel type de personne ?</div>
+      <div class="options">
+        <div class="option" onclick="selectOption(this,'q6')"><span class="option-emoji">😎</span><span class="option-text">Celui qu'on appelle quand on a besoin d'un bon plan</span></div>
+        <div class="option" onclick="selectOption(this,'q6')"><span class="option-emoji">🤷</span><span class="option-text">Parfois on me demande des conseils</span></div>
+        <div class="option" onclick="selectOption(this,'q6')"><span class="option-emoji">🙈</span><span class="option-text">Pas vraiment, je suis plutôt discret</span></div>
+      </div>
+    </div>
+    <button class="btn" onclick="nextStep(6)">Continuer →</button>
+  </div>
+
+  <div class="step" id="step-7">
+    <div class="card">
+      <div class="q-num">Question 7 sur 8</div>
+      <div class="q-text">Des amis ou ta famille te demandent comment accéder à Netflix pas cher ?</div>
+      <div class="options">
+        <div class="option" onclick="selectOption(this,'q7')"><span class="option-emoji">😅</span><span class="option-text">Oui souvent et je ne sais jamais quoi leur dire</span></div>
+        <div class="option" onclick="selectOption(this,'q7')"><span class="option-emoji">🤔</span><span class="option-text">Oui parfois ça arrive</span></div>
+        <div class="option" onclick="selectOption(this,'q7')"><span class="option-emoji">💪</span><span class="option-text">Non mais j'adorerais pouvoir les aider !</span></div>
+      </div>
+    </div>
+    <button class="btn" onclick="nextStep(7)">Continuer →</button>
+  </div>
+
+  <div class="step" id="step-8">
+    <div class="card">
+      <div class="q-num">Question 8 sur 8 — Dernière étape !</div>
+      <div class="q-text" id="q8-title">Tu es prêt à investir une petite somme pour économiser, aider ton entourage ET gagner de l'argent ?</div>
+      <div class="options">
+        <div class="option" onclick="selectOption(this,'q8')"><span class="option-emoji">💎</span><span class="option-text">OUI, je suis prêt à passer à l'action !</span></div>
+        <div class="option" onclick="selectOption(this,'q8')"><span class="option-emoji">⏳</span><span class="option-text">Ça dépend du montant, dis m'en plus</span></div>
+        <div class="option" onclick="selectOption(this,'q8')"><span class="option-emoji">🚶</span><span class="option-text">Pas encore, peut-être plus tard</span></div>
+      </div>
+      <input type="tel" id="whatsapp" placeholder="Ton numéro WhatsApp..." style="margin-top:1rem;" />
+    </div>
+    <button class="btn" onclick="submitForm()">Rejoindre Stream Source 🚀</button>
+  </div>
+
+  <div class="step" id="step-success">
+    <div class="success-card">
+      <div class="success-icon">🎉</div>
+      <div class="success-title" id="success-title">Félicitations !</div>
+      <div class="success-text">Tu fais partie des élus ! Tu vas bientôt découvrir comment économiser sur tes abonnements et en faire une source de revenus.<br><br>Rejoins maintenant le groupe privé <strong>Stream Source</strong> sur WhatsApp.</div>
+      <a class="btn-wa" href="https://chat.whatsapp.com/Lx6TtWQkNpzEmPk4mOcog8?s=cl&p=a&mlu=4" target="_blank">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Rejoindre le groupe
+      </a>
+      <p class="wa-note">Groupe privé — places limitées</p>
+    </div>
+  </div>
+</div>
+
+<script>
+let prenom = '';
+let currentStep = 1;
+const answers = {};
+
+function getConfig() {
+  return JSON.parse(localStorage.getItem('ss_config') || '{"limit":30,"active":true}');
+}
+
+function getResponses() {
+  return JSON.parse(localStorage.getItem('ss_responses') || '[]');
+}
+
+function checkAvailability() {
+  const config = getConfig();
+  const responses = getResponses();
+  const remaining = config.limit - responses.length;
+  document.getElementById('step-closed-check').classList.remove('active');
+
+  if (!config.active || responses.length >= config.limit) {
+    document.getElementById('step-closed').classList.add('active');
+    document.getElementById('progress').style.width = '100%';
+    return;
+  }
+
+  document.getElementById('badge').textContent = remaining + ' place' + (remaining > 1 ? 's' : '') + ' restante' + (remaining > 1 ? 's' : '');
+  document.getElementById('counter').innerHTML = '<span>' + responses.length + '</span> / ' + config.limit + ' personnes inscrites';
+  document.getElementById('step-1').classList.add('active');
+}
+
+function nextStep(step) {
+  if (step === 1) {
+    const val = document.getElementById('prenom').value.trim();
+    if (!val) { document.getElementById('prenom').focus(); return; }
+    prenom = val;
+    document.getElementById('q2-title').textContent = 'Hey ' + prenom + ' ! Combien tu claques par mois en abonnements streaming ?';
+    document.getElementById('q8-title').textContent = prenom + ', tu es prêt à investir une petite somme pour économiser, aider ton entourage ET gagner de l\'argent ?';
+    document.getElementById('success-title').textContent = 'Félicitations ' + prenom + ' !';
+  }
+  document.getElementById('step-' + step).classList.remove('active');
+  currentStep = step + 1;
+  document.getElementById('step-' + currentStep).classList.add('active');
+  document.getElementById('progress').style.width = ((currentStep / 8) * 100) + '%';
+  window.scrollTo(0, 0);
+}
+
+function selectOption(el, group) {
+  el.closest('.options').querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  answers[group] = el.querySelector('.option-text').textContent;
+}
+
+function submitForm() {
+  const tel = document.getElementById('whatsapp').value.trim();
+  if (!tel) { document.getElementById('whatsapp').focus(); return; }
+
+  const config = getConfig();
+  const responses = getResponses();
+
+  if (responses.length >= config.limit) {
+    document.getElementById('step-8').classList.remove('active');
+    document.getElementById('step-closed').classList.add('active');
+    return;
+  }
+
+  const entry = {
+    id: Date.now(),
+    date: new Date().toLocaleString('fr-FR'),
+    prenom: prenom,
+    whatsapp: tel,
+    q2: answers.q2 || '',
+    q3: answers.q3 || '',
+    q4: answers.q4 || '',
+    q5: answers.q5 || '',
+    q6: answers.q6 || '',
+    q7: answers.q7 || '',
+    q8: answers.q8 || ''
+  };
+
+  responses.push(entry);
+  localStorage.setItem('ss_responses', JSON.stringify(responses));
+
+  document.getElementById('step-8').classList.remove('active');
+  document.getElementById('step-success').classList.add('active');
+  document.getElementById('progress').style.width = '100%';
+  window.scrollTo(0, 0);
+}
+
+checkAvailability();
+</script>
+</body>
+</html>
