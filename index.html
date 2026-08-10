@@ -53,8 +53,8 @@
   .phone-error { font-size: 12px; color: #ef4444; margin-top: 6px; display: none; }
 
   .btn { width: 100%; padding: 15px; background: #6366f1; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 1rem; transition: all 0.15s; font-family: inherit; }
-  .btn:hover { background: #4f46e5; transform: translateY(-1px); }
-  .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+  .btn:hover:not(:disabled) { background: #4f46e5; transform: translateY(-1px); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
   .step { display: none; }
   .step.active { display: block; }
   .already-card { text-align: center; padding: 3rem 2rem; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; }
@@ -80,6 +80,7 @@
   .spinner { width: 32px; height: 32px; border: 3px solid #2a2a2a; border-top-color: #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1rem; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .form-error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #f87171; font-size: 13px; padding: 10px 14px; border-radius: 8px; margin-top: 0.75rem; display: none; }
+  .select-hint { font-size: 12px; color: #f59e0b; margin-top: 0.75rem; display: none; }
 </style>
 </head>
 <body>
@@ -91,7 +92,7 @@
   </div>
 
   <div class="counter" id="counter"></div>
-  <div class="progress-bar"><div class="progress-fill" id="progress" style="width:12.5%"></div></div>
+  <div class="progress-bar"><div class="progress-fill" id="progress" style="width:11.1%"></div></div>
 
   <div class="step active" id="step-loading">
     <div class="loading"><div class="spinner"></div>Chargement...</div>
@@ -118,6 +119,7 @@
     </div>
   </div>
 
+  <!-- Question 1 -->
   <div class="step" id="step-1">
     <div class="card">
       <div class="q-num">Question 1 sur 8</div>
@@ -127,6 +129,7 @@
     <button class="btn" onclick="nextStep(1)">Continuer →</button>
   </div>
 
+  <!-- Question 2 -->
   <div class="step" id="step-2">
     <div class="card">
       <div class="q-num">Question 2 sur 8</div>
@@ -138,10 +141,12 @@
         <div class="option" onclick="selectOption(this,'q2')"><span class="option-emoji">😩</span><span class="option-text">Plus de 15 000 FCFA</span></div>
         <div class="option" onclick="selectOption(this,'q2')"><span class="option-emoji">😔</span><span class="option-text">Pas d'abonnement, trop cher pour moi</span></div>
       </div>
+      <div class="select-hint" id="hint-q2">👆 Sélectionne une réponse pour continuer</div>
     </div>
-    <button class="btn" onclick="nextStep(2)">Continuer →</button>
+    <button class="btn" id="btn-2" onclick="nextStepWithValidation(2,'q2')" disabled>Continuer →</button>
   </div>
 
+  <!-- Question 3 -->
   <div class="step" id="step-3">
     <div class="card">
       <div class="q-num">Question 3 sur 8</div>
@@ -151,10 +156,12 @@
         <div class="option" onclick="selectOption(this,'q3')"><span class="option-emoji">🟡</span><span class="option-text">Oui parfois ça arrive</span></div>
         <div class="option" onclick="selectOption(this,'q3')"><span class="option-emoji">🟢</span><span class="option-text">Non jamais, je gère</span></div>
       </div>
+      <div class="select-hint" id="hint-q3">👆 Sélectionne une réponse pour continuer</div>
     </div>
-    <button class="btn" onclick="nextStep(3)">Continuer →</button>
+    <button class="btn" id="btn-3" onclick="nextStepWithValidation(3,'q3')" disabled>Continuer →</button>
   </div>
 
+  <!-- Question 4 -->
   <div class="step" id="step-4">
     <div class="card">
       <div class="q-num">Question 4 sur 8</div>
@@ -164,10 +171,12 @@
         <div class="option" onclick="selectOption(this,'q4')"><span class="option-emoji">🤔</span><span class="option-text">Intéressant... dis m'en plus</span></div>
         <div class="option" onclick="selectOption(this,'q4')"><span class="option-emoji">😐</span><span class="option-text">J'attends de voir</span></div>
       </div>
+      <div class="select-hint" id="hint-q4">👆 Sélectionne une réponse pour continuer</div>
     </div>
-    <button class="btn" onclick="nextStep(4)">Continuer →</button>
+    <button class="btn" id="btn-4" onclick="nextStepWithValidation(4,'q4')" disabled>Continuer →</button>
   </div>
 
+  <!-- Question 5 -->
   <div class="step" id="step-5">
     <div class="card">
       <div class="q-num">Question 5 sur 8</div>
@@ -177,10 +186,12 @@
         <div class="option" onclick="selectOption(this,'q5')"><span class="option-emoji">💡</span><span class="option-text">Pourquoi pas, je suis curieux</span></div>
         <div class="option" onclick="selectOption(this,'q5')"><span class="option-emoji">🎯</span><span class="option-text">Non merci, juste économiser me suffit</span></div>
       </div>
+      <div class="select-hint" id="hint-q5">👆 Sélectionne une réponse pour continuer</div>
     </div>
-    <button class="btn" onclick="nextStep(5)">Continuer →</button>
+    <button class="btn" id="btn-5" onclick="nextStepWithValidation(5,'q5')" disabled>Continuer →</button>
   </div>
 
+  <!-- Question 6 -->
   <div class="step" id="step-6">
     <div class="card">
       <div class="q-num">Question 6 sur 8</div>
@@ -190,10 +201,12 @@
         <div class="option" onclick="selectOption(this,'q6')"><span class="option-emoji">🤷</span><span class="option-text">Parfois on me demande des conseils</span></div>
         <div class="option" onclick="selectOption(this,'q6')"><span class="option-emoji">🙈</span><span class="option-text">Pas vraiment, je suis plutôt discret</span></div>
       </div>
+      <div class="select-hint" id="hint-q6">👆 Sélectionne une réponse pour continuer</div>
     </div>
-    <button class="btn" onclick="nextStep(6)">Continuer →</button>
+    <button class="btn" id="btn-6" onclick="nextStepWithValidation(6,'q6')" disabled>Continuer →</button>
   </div>
 
+  <!-- Question 7 -->
   <div class="step" id="step-7">
     <div class="card">
       <div class="q-num">Question 7 sur 8</div>
@@ -203,25 +216,38 @@
         <div class="option" onclick="selectOption(this,'q7')"><span class="option-emoji">🤔</span><span class="option-text">Oui parfois ça arrive</span></div>
         <div class="option" onclick="selectOption(this,'q7')"><span class="option-emoji">💪</span><span class="option-text">Non mais j'adorerais pouvoir les aider !</span></div>
       </div>
+      <div class="select-hint" id="hint-q7">👆 Sélectionne une réponse pour continuer</div>
     </div>
-    <button class="btn" onclick="nextStep(7)">Continuer →</button>
+    <button class="btn" id="btn-7" onclick="nextStepWithValidation(7,'q7')" disabled>Continuer →</button>
   </div>
 
+  <!-- Question 8 -->
   <div class="step" id="step-8">
     <div class="card">
-      <div class="q-num">Question 8 sur 8 — Dernière étape !</div>
+      <div class="q-num">Question 8 sur 8</div>
       <div class="q-text" id="q8-title">Tu es prêt à investir une petite somme pour économiser, aider ton entourage ET gagner de l'argent ?</div>
       <div class="options">
         <div class="option" onclick="selectOption(this,'q8')"><span class="option-emoji">💎</span><span class="option-text">OUI, je suis prêt à passer à l'action !</span></div>
         <div class="option" onclick="selectOption(this,'q8')"><span class="option-emoji">⏳</span><span class="option-text">Ça dépend du montant, dis m'en plus</span></div>
         <div class="option" onclick="selectOption(this,'q8')"><span class="option-emoji">🚶</span><span class="option-text">Pas encore, peut-être plus tard</span></div>
       </div>
+      <div class="select-hint" id="hint-q8">👆 Sélectionne une réponse pour continuer</div>
+    </div>
+    <button class="btn" id="btn-8" onclick="nextStepWithValidation(8,'q8')" disabled>Continuer →</button>
+  </div>
 
-      <!-- intl-tel-input -->
-      <input type="tel" id="whatsapp" placeholder="Ton numéro WhatsApp" />
-      <div class="phone-error" id="phone-error">⚠️ Numéro invalide, vérifie ton numéro</div>
+  <!-- Étape 9 : Numéro + Question libre -->
+  <div class="step" id="step-9">
+    <div class="card">
+      <div class="q-num">Dernière étape !</div>
+      <div class="q-text" id="q9-title">Plus qu'une étape pour rejoindre le groupe 🚀</div>
 
-      <!-- Question libre -->
+      <div style="margin-top: 1rem;">
+        <div style="font-size:13px; color:#9ca3af; margin-bottom:0.4rem;">📱 Ton numéro WhatsApp</div>
+        <input type="tel" id="whatsapp" placeholder="Ton numéro WhatsApp" />
+        <div class="phone-error" id="phone-error">⚠️ Numéro invalide, vérifie ton numéro</div>
+      </div>
+
       <div style="margin-top: 1.25rem;">
         <div style="font-size:13px; color:#6b7280; margin-bottom:0.5rem;">💬 Tu as une question avant de rejoindre ? <span style="color:#4b5563;">(optionnel)</span></div>
         <textarea id="question-libre" placeholder="Pose ta question ici..."></textarea>
@@ -232,6 +258,7 @@
     <button class="btn" id="btn-submit" onclick="submitForm()">Rejoindre Stream Source 🚀</button>
   </div>
 
+  <!-- Succès -->
   <div class="step" id="step-success">
     <div class="success-card">
       <div class="success-icon">🎉</div>
@@ -257,6 +284,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const WA_GROUP_LINK = 'https://chat.whatsapp.com/Lx6TtWQkNpzEmPk4mOcog8?s=cl&p=a&mlu=4';
 const LS_KEY = 'ss_submitted';
+const TOTAL_STEPS = 9;
 
 let itiInstance = null;
 let currentEntryId = null;
@@ -278,10 +306,20 @@ function initPhoneInput() {
 }
 
 function getFullNumber() {
-  return itiInstance.getNumber(); // retourne ex: +22901234567
+  return itiInstance.getNumber();
 }
 
+// ── Validation numéro béninois ───────────────────────────────────
 function isValidPhone() {
+  const input = document.getElementById('whatsapp');
+  let val = input.value.trim();
+
+  // Si ça commence par 01, on retire le 01 pour revenir à l'ancienne norme
+  // que la lib connaît déjà (+229 + 8 chiffres)
+  if (val.startsWith('01')) {
+    input.value = val.substring(2);
+  }
+
   return itiInstance.isValidNumber();
 }
 
@@ -348,6 +386,10 @@ async function checkAvailability() {
 }
 
 // ── Navigation ───────────────────────────────────────────────────
+function updateProgress(step) {
+  document.getElementById('progress').style.width = ((step / TOTAL_STEPS) * 100) + '%';
+}
+
 function nextStep(step) {
   if (step === 1) {
     const val = document.getElementById('prenom').value.trim();
@@ -355,12 +397,26 @@ function nextStep(step) {
     prenom = val;
     document.getElementById('q2-title').textContent = 'Hey ' + prenom + ' ! Combien tu claques par mois en abonnements streaming ?';
     document.getElementById('q8-title').textContent = prenom + ', tu es prêt à investir une petite somme pour économiser, aider ton entourage ET gagner de l\'argent ?';
+    document.getElementById('q9-title').textContent = prenom + ', plus qu\'une étape pour rejoindre le groupe 🚀';
     document.getElementById('success-title').textContent = 'Félicitations ' + prenom + ' ! 🎉';
   }
   document.getElementById('step-' + step).classList.remove('active');
   currentStep = step + 1;
   document.getElementById('step-' + currentStep).classList.add('active');
-  document.getElementById('progress').style.width = ((currentStep / 8) * 100) + '%';
+  updateProgress(currentStep);
+  window.scrollTo(0, 0);
+}
+
+// Navigation pour les étapes avec choix obligatoire
+function nextStepWithValidation(step, group) {
+  if (!answers[group]) {
+    document.getElementById('hint-' + group).style.display = 'block';
+    return;
+  }
+  document.getElementById('step-' + step).classList.remove('active');
+  currentStep = step + 1;
+  document.getElementById('step-' + currentStep).classList.add('active');
+  updateProgress(currentStep);
   window.scrollTo(0, 0);
 }
 
@@ -368,6 +424,14 @@ function selectOption(el, group) {
   el.closest('.options').querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
   el.classList.add('selected');
   answers[group] = el.querySelector('.option-text').textContent;
+
+  // Active le bouton continuer et cache le hint
+  const btn = document.getElementById('btn-' + (Object.keys(answers).length + 1));
+  const stepNum = ['q2','q3','q4','q5','q6','q7','q8'].indexOf(group) + 2;
+  const stepBtn = document.getElementById('btn-' + stepNum);
+  if (stepBtn) stepBtn.disabled = false;
+  const hint = document.getElementById('hint-' + group);
+  if (hint) hint.style.display = 'none';
 }
 
 // ── Soumission ───────────────────────────────────────────────────
@@ -393,7 +457,7 @@ async function submitForm() {
       .eq('statut', 'confirmé');
 
     if (!config.active || count >= config.limite) {
-      document.getElementById('step-8').classList.remove('active');
+      document.getElementById('step-9').classList.remove('active');
       document.getElementById('step-closed').classList.add('active');
       return;
     }
@@ -404,7 +468,7 @@ async function submitForm() {
 
     if (existing && existing.length > 0) {
       markAsSubmitted();
-      document.getElementById('step-8').classList.remove('active');
+      document.getElementById('step-9').classList.remove('active');
       document.getElementById('step-already').classList.add('active');
       return;
     }
@@ -428,9 +492,9 @@ async function submitForm() {
     currentEntryId = inserted.id;
     markAsSubmitted();
 
-    document.getElementById('step-8').classList.remove('active');
+    document.getElementById('step-9').classList.remove('active');
     document.getElementById('step-success').classList.add('active');
-    document.getElementById('progress').style.width = '100%';
+    updateProgress(TOTAL_STEPS);
     window.scrollTo(0, 0);
 
   } catch (e) {
