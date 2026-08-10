@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Stream Source — Rejoins le groupe privé</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@18/build/css/intlTelInput.css">
+<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@18/build/js/intlTelInput.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f0f; color: #fff; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem; }
@@ -25,14 +27,40 @@
   .option.selected { border-color: #6366f1; background: rgba(99,102,241,0.12); }
   .option-emoji { font-size: 20px; width: 28px; text-align: center; }
   .option-text { font-size: 14px; color: #e5e7eb; }
-  input[type="text"], input[type="tel"] { width: 100%; padding: 13px 16px; background: #111; border: 1px solid #2a2a2a; border-radius: 10px; font-size: 15px; color: #fff; font-family: inherit; outline: none; transition: border-color 0.15s; }
-  input:focus { border-color: #6366f1; }
+  input[type="text"] { width: 100%; padding: 13px 16px; background: #111; border: 1px solid #2a2a2a; border-radius: 10px; font-size: 15px; color: #fff; font-family: inherit; outline: none; transition: border-color 0.15s; }
+  input[type="text"]:focus { border-color: #6366f1; }
   input::placeholder { color: #4b5563; }
+  textarea { width: 100%; padding: 13px 16px; background: #111; border: 1px solid #2a2a2a; border-radius: 10px; font-size: 14px; color: #fff; font-family: inherit; outline: none; transition: border-color 0.15s; resize: vertical; min-height: 90px; }
+  textarea:focus { border-color: #6366f1; }
+  textarea::placeholder { color: #4b5563; }
+
+  /* intl-tel-input overrides */
+  .iti { width: 100%; margin-top: 1rem; }
+  .iti__tel-input { width: 100%; padding: 13px 16px 13px 52px; background: #111; border: 1px solid #2a2a2a; border-radius: 10px; font-size: 15px; color: #fff; font-family: inherit; outline: none; transition: border-color 0.15s; }
+  .iti__tel-input:focus { border-color: #6366f1; }
+  .iti__tel-input::placeholder { color: #4b5563; }
+  .iti__tel-input.error { border-color: #ef4444; }
+  .iti__flag-container { background: transparent; }
+  .iti__selected-flag { background: #111 !important; border-radius: 10px 0 0 10px; padding: 0 8px 0 12px; }
+  .iti__selected-flag:hover { background: #1a1a1a !important; }
+  .iti__dropdown-content { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; }
+  .iti__country { color: #e5e7eb; }
+  .iti__country:hover { background: rgba(99,102,241,0.1) !important; }
+  .iti__country.iti__highlight { background: rgba(99,102,241,0.15) !important; }
+  .iti__search-input { background: #111; border: 1px solid #2a2a2a; color: #fff; border-radius: 8px; padding: 8px 12px; }
+  .iti__search-input::placeholder { color: #4b5563; }
+  .iti__dial-code { color: #6b7280; }
+  .phone-error { font-size: 12px; color: #ef4444; margin-top: 6px; display: none; }
+
   .btn { width: 100%; padding: 15px; background: #6366f1; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 1rem; transition: all 0.15s; font-family: inherit; }
   .btn:hover { background: #4f46e5; transform: translateY(-1px); }
   .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
   .step { display: none; }
   .step.active { display: block; }
+  .already-card { text-align: center; padding: 3rem 2rem; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; }
+  .already-icon { font-size: 52px; margin-bottom: 1rem; }
+  .already-title { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 0.75rem; }
+  .already-text { font-size: 14px; color: #9ca3af; line-height: 1.6; }
   .closed-card { text-align: center; padding: 3rem 2rem; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; }
   .closed-icon { font-size: 52px; margin-bottom: 1rem; }
   .closed-title { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 0.75rem; }
@@ -41,14 +69,17 @@
   .success-icon { font-size: 52px; margin-bottom: 1rem; }
   .success-title { font-size: 24px; font-weight: 700; color: #fff; margin-bottom: 0.75rem; }
   .success-text { font-size: 14px; color: #9ca3af; line-height: 1.6; margin-bottom: 1.75rem; }
-  .btn-wa { display: inline-flex; align-items: center; gap: 10px; padding: 15px 30px; background: #25D366; color: #fff; border-radius: 10px; font-size: 15px; font-weight: 600; text-decoration: none; transition: all 0.15s; }
-  .btn-wa:hover { background: #1ebe5d; transform: translateY(-1px); }
+  .btn-wa { display: inline-flex; align-items: center; gap: 10px; padding: 15px 30px; background: #25D366; color: #fff; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; border: none; font-family: inherit; width: auto; margin-top: 0; transition: all 0.15s; }
+  .btn-wa:hover:not(:disabled) { background: #1ebe5d; transform: translateY(-1px); }
+  .btn-wa:disabled { opacity: 0.6; cursor: not-allowed; }
+  .wa-joined { font-size: 13px; color: #34d399; margin-top: 1rem; display: none; }
   .wa-note { font-size: 12px; color: #4b5563; margin-top: 1rem; }
   .counter { font-size: 12px; color: #4b5563; text-align: center; margin-bottom: 1.5rem; }
   .counter span { color: #6366f1; font-weight: 600; }
   .loading { text-align: center; padding: 3rem; color: #4b5563; }
   .spinner { width: 32px; height: 32px; border: 3px solid #2a2a2a; border-top-color: #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1rem; }
   @keyframes spin { to { transform: rotate(360deg); } }
+  .form-error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #f87171; font-size: 13px; padding: 10px 14px; border-radius: 8px; margin-top: 0.75rem; display: none; }
 </style>
 </head>
 <body>
@@ -63,9 +94,19 @@
   <div class="progress-bar"><div class="progress-fill" id="progress" style="width:12.5%"></div></div>
 
   <div class="step active" id="step-loading">
-    <div class="loading">
-      <div class="spinner"></div>
-      Chargement...
+    <div class="loading"><div class="spinner"></div>Chargement...</div>
+  </div>
+
+  <div class="step" id="step-already">
+    <div class="already-card">
+      <div class="already-icon">👋</div>
+      <div class="already-title">Tu es déjà inscrit !</div>
+      <div class="already-text">Tu as déjà rempli le formulaire.<br>Rejoins le groupe WhatsApp si ce n'est pas encore fait.</div>
+      <br>
+      <button class="btn-wa" onclick="window.open('https://chat.whatsapp.com/Lx6TtWQkNpzEmPk4mOcog8?s=cl&p=a&mlu=4','_blank')" style="margin:0 auto;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Rejoindre le groupe
+      </button>
     </div>
   </div>
 
@@ -175,7 +216,18 @@
         <div class="option" onclick="selectOption(this,'q8')"><span class="option-emoji">⏳</span><span class="option-text">Ça dépend du montant, dis m'en plus</span></div>
         <div class="option" onclick="selectOption(this,'q8')"><span class="option-emoji">🚶</span><span class="option-text">Pas encore, peut-être plus tard</span></div>
       </div>
-      <input type="tel" id="whatsapp" placeholder="Ton numéro WhatsApp..." style="margin-top:1rem;" />
+
+      <!-- intl-tel-input -->
+      <input type="tel" id="whatsapp" placeholder="Ton numéro WhatsApp" />
+      <div class="phone-error" id="phone-error">⚠️ Numéro invalide, vérifie ton numéro</div>
+
+      <!-- Question libre -->
+      <div style="margin-top: 1.25rem;">
+        <div style="font-size:13px; color:#6b7280; margin-bottom:0.5rem;">💬 Tu as une question avant de rejoindre ? <span style="color:#4b5563;">(optionnel)</span></div>
+        <textarea id="question-libre" placeholder="Pose ta question ici..."></textarea>
+      </div>
+
+      <div class="form-error" id="form-error"></div>
     </div>
     <button class="btn" id="btn-submit" onclick="submitForm()">Rejoindre Stream Source 🚀</button>
   </div>
@@ -184,12 +236,16 @@
     <div class="success-card">
       <div class="success-icon">🎉</div>
       <div class="success-title" id="success-title">Félicitations !</div>
-      <div class="success-text">Tu fais partie des élus ! Tu vas bientôt découvrir comment économiser sur tes abonnements et en faire une source de revenus.<br><br>Rejoins maintenant le groupe privé <strong>Stream Source</strong> sur WhatsApp.</div>
-      <a class="btn-wa" href="https://chat.whatsapp.com/Lx6TtWQkNpzEmPk4mOcog8?s=cl&p=a&mlu=4" target="_blank">
+      <div class="success-text">
+        Tu fais partie des élus ! Clique ci-dessous pour rejoindre le groupe privé <strong>Stream Source</strong> sur WhatsApp.<br><br>
+        <span style="color:#f59e0b;font-size:13px;">⚡ Rejoins vite, les places partent rapidement !</span>
+      </div>
+      <button class="btn-wa" id="btn-join" onclick="joinGroup()">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
         Rejoindre le groupe
-      </a>
-      <p class="wa-note">Groupe privé — places limitées</p>
+      </button>
+      <div class="wa-joined" id="wa-joined">✅ Tu as rejoint le groupe ! Bienvenue dans Stream Source 🎬</div>
+      <p class="wa-note" id="wa-note">Groupe privé — places limitées</p>
     </div>
   </div>
 </div>
@@ -199,14 +255,79 @@ const SUPABASE_URL = 'https://vmggidzgzkbgrmyjllzv.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtZ2dpZHpnemtiZ3JteWpsbHp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyNzQzMTcsImV4cCI6MjEwMTg1MDMxN30.jRg4e9TlYrHgJUljT68i0aCtkYMZ8uMb3p5Itu3DpdE';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+const WA_GROUP_LINK = 'https://chat.whatsapp.com/Lx6TtWQkNpzEmPk4mOcog8?s=cl&p=a&mlu=4';
+const LS_KEY = 'ss_submitted';
+
+let itiInstance = null;
+let currentEntryId = null;
+let joinDone = false;
 let prenom = '';
 let currentStep = 1;
 const answers = {};
 
+// ── intl-tel-input init ──────────────────────────────────────────
+function initPhoneInput() {
+  const input = document.getElementById('whatsapp');
+  itiInstance = window.intlTelInput(input, {
+    initialCountry: 'bj',
+    preferredCountries: ['bj', 'sn', 'ci', 'ml', 'bf', 'tg', 'ne', 'gn', 'cm'],
+    separateDialCode: true,
+    utilsScript: 'https://cdn.jsdelivr.net/npm/intl-tel-input@18/build/js/utils.js',
+    customPlaceholder: () => 'Ton numéro WhatsApp',
+  });
+}
+
+function getFullNumber() {
+  return itiInstance.getNumber(); // retourne ex: +22901234567
+}
+
+function isValidPhone() {
+  return itiInstance.isValidNumber();
+}
+
+function showPhoneError() {
+  document.getElementById('phone-error').style.display = 'block';
+  document.getElementById('whatsapp').classList.add('error');
+}
+
+function clearPhoneError() {
+  document.getElementById('phone-error').style.display = 'none';
+  document.getElementById('whatsapp').classList.remove('error');
+}
+
+function showFormError(msg) {
+  const el = document.getElementById('form-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function clearFormError() {
+  document.getElementById('form-error').style.display = 'none';
+}
+
+// ── Anti-spam ────────────────────────────────────────────────────
+function checkAlreadySubmitted() {
+  return localStorage.getItem(LS_KEY) === 'true';
+}
+
+function markAsSubmitted() {
+  localStorage.setItem(LS_KEY, 'true');
+}
+
+// ── Disponibilité ────────────────────────────────────────────────
 async function checkAvailability() {
+  if (checkAlreadySubmitted()) {
+    document.getElementById('step-loading').classList.remove('active');
+    document.getElementById('step-already').classList.add('active');
+    document.getElementById('progress').style.width = '100%';
+    return;
+  }
+
   try {
     const { data: config } = await sb.from('config').select('*').eq('id', 1).single();
-    const { count } = await sb.from('reponses').select('*', { count: 'exact', head: true });
+    const { count } = await sb.from('reponses')
+      .select('*', { count: 'exact', head: true })
+      .eq('statut', 'confirmé');
 
     document.getElementById('step-loading').classList.remove('active');
 
@@ -218,7 +339,7 @@ async function checkAvailability() {
 
     const remaining = config.limite - count;
     document.getElementById('badge').textContent = remaining + ' place' + (remaining > 1 ? 's' : '') + ' restante' + (remaining > 1 ? 's' : '');
-    document.getElementById('counter').innerHTML = '<span>' + count + '</span> / ' + config.limite + ' personnes inscrites';
+    document.getElementById('counter').innerHTML = '<span>' + count + '</span> / ' + config.limite + ' places prises';
     document.getElementById('step-1').classList.add('active');
   } catch (e) {
     document.getElementById('step-loading').classList.remove('active');
@@ -226,6 +347,7 @@ async function checkAvailability() {
   }
 }
 
+// ── Navigation ───────────────────────────────────────────────────
 function nextStep(step) {
   if (step === 1) {
     const val = document.getElementById('prenom').value.trim();
@@ -233,7 +355,7 @@ function nextStep(step) {
     prenom = val;
     document.getElementById('q2-title').textContent = 'Hey ' + prenom + ' ! Combien tu claques par mois en abonnements streaming ?';
     document.getElementById('q8-title').textContent = prenom + ', tu es prêt à investir une petite somme pour économiser, aider ton entourage ET gagner de l\'argent ?';
-    document.getElementById('success-title').textContent = 'Félicitations ' + prenom + ' !';
+    document.getElementById('success-title').textContent = 'Félicitations ' + prenom + ' ! 🎉';
   }
   document.getElementById('step-' + step).classList.remove('active');
   currentStep = step + 1;
@@ -248,9 +370,17 @@ function selectOption(el, group) {
   answers[group] = el.querySelector('.option-text').textContent;
 }
 
+// ── Soumission ───────────────────────────────────────────────────
 async function submitForm() {
-  const tel = document.getElementById('whatsapp').value.trim();
-  if (!tel) { document.getElementById('whatsapp').focus(); return; }
+  clearPhoneError();
+  clearFormError();
+
+  const rawVal = document.getElementById('whatsapp').value.trim();
+  if (!rawVal) { document.getElementById('whatsapp').focus(); return; }
+  if (!isValidPhone()) { showPhoneError(); return; }
+
+  const fullNumber = getFullNumber();
+  const questionLibre = document.getElementById('question-libre').value.trim();
 
   const btn = document.getElementById('btn-submit');
   btn.disabled = true;
@@ -258,7 +388,9 @@ async function submitForm() {
 
   try {
     const { data: config } = await sb.from('config').select('*').eq('id', 1).single();
-    const { count } = await sb.from('reponses').select('*', { count: 'exact', head: true });
+    const { count } = await sb.from('reponses')
+      .select('*', { count: 'exact', head: true })
+      .eq('statut', 'confirmé');
 
     if (!config.active || count >= config.limite) {
       document.getElementById('step-8').classList.remove('active');
@@ -266,29 +398,74 @@ async function submitForm() {
       return;
     }
 
-    await sb.from('reponses').insert({
-      prenom: prenom,
-      whatsapp: tel,
+    // Vérif doublon numéro
+    const { data: existing } = await sb.from('reponses')
+      .select('id').eq('whatsapp', fullNumber).limit(1);
+
+    if (existing && existing.length > 0) {
+      markAsSubmitted();
+      document.getElementById('step-8').classList.remove('active');
+      document.getElementById('step-already').classList.add('active');
+      return;
+    }
+
+    const { data: inserted, error } = await sb.from('reponses').insert({
+      prenom,
+      whatsapp: fullNumber,
       q2: answers.q2 || '',
       q3: answers.q3 || '',
       q4: answers.q4 || '',
       q5: answers.q5 || '',
       q6: answers.q6 || '',
       q7: answers.q7 || '',
-      q8: answers.q8 || ''
-    });
+      q8: answers.q8 || '',
+      question: questionLibre,
+      statut: 'brouillon'
+    }).select().single();
+
+    if (error || !inserted || !inserted.id) throw new Error('Insertion échouée');
+
+    currentEntryId = inserted.id;
+    markAsSubmitted();
 
     document.getElementById('step-8').classList.remove('active');
     document.getElementById('step-success').classList.add('active');
     document.getElementById('progress').style.width = '100%';
     window.scrollTo(0, 0);
+
   } catch (e) {
     btn.disabled = false;
     btn.textContent = 'Rejoindre Stream Source 🚀';
-    alert('Une erreur est survenue, réessaie.');
+    showFormError('❌ Une erreur est survenue. Vérifie ta connexion et réessaie.');
   }
 }
 
+// ── Rejoindre → confirmé ─────────────────────────────────────────
+async function joinGroup() {
+  if (joinDone) return;
+  joinDone = true;
+
+  const btn = document.getElementById('btn-join');
+  btn.disabled = true;
+  btn.textContent = 'Redirection...';
+
+  if (currentEntryId) {
+    try {
+      await sb.from('reponses')
+        .update({ statut: 'confirmé' })
+        .eq('id', currentEntryId);
+    } catch (e) { /* silencieux */ }
+  }
+
+  document.getElementById('wa-joined').style.display = 'block';
+  document.getElementById('wa-note').style.display = 'none';
+  btn.style.display = 'none';
+
+  window.open(WA_GROUP_LINK, '_blank');
+}
+
+// ── Init ─────────────────────────────────────────────────────────
+initPhoneInput();
 checkAvailability();
 </script>
 </body>
