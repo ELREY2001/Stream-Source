@@ -8,7 +8,7 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0a; color: #fff; min-height: 100vh; padding: 2rem 1rem; }
-  .wrap { max-width: 1100px; margin: 0 auto; }
+  .wrap { max-width: 1300px; margin: 0 auto; }
   .admin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
   .admin-title { font-size: 24px; font-weight: 700; }
   .admin-title span { color: #6366f1; }
@@ -19,6 +19,7 @@
   .stat-value { font-size: 28px; font-weight: 700; color: #fff; }
   .stat-value.accent { color: #6366f1; }
   .stat-value.green { color: #34d399; }
+  .stat-value.orange { color: #f59e0b; }
   .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
   .section-title { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
   .controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
@@ -33,6 +34,10 @@
   .btn-danger:hover { background: #b91c1c; }
   .btn-outline { background: transparent; color: #9ca3af; border: 1px solid #2a2a2a; }
   .btn-outline:hover { border-color: #6366f1; color: #818cf8; }
+  .btn-wa { background: #25D366; color: #fff; }
+  .btn-wa:hover { background: #1ebe5d; }
+  .btn-confirm { background: rgba(52,211,153,0.15); color: #34d399; border: 1px solid rgba(52,211,153,0.3); }
+  .btn-confirm:hover { background: rgba(52,211,153,0.25); }
   .btn-sm { padding: 5px 10px; font-size: 12px; }
   .toggle-wrap { display: flex; align-items: center; gap: 10px; }
   .toggle { position: relative; width: 44px; height: 24px; }
@@ -42,13 +47,19 @@
   input:checked + .slider { background: #6366f1; }
   input:checked + .slider:before { transform: translateX(20px); }
   .toggle-label { font-size: 14px; color: #9ca3af; }
+  .filters { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
+  .filter-btn { padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid #2a2a2a; background: #111; color: #9ca3af; font-family: inherit; transition: all 0.15s; }
+  .filter-btn.active { background: rgba(99,102,241,0.15); border-color: #6366f1; color: #818cf8; }
+  .filter-btn:hover { border-color: #6366f1; }
   .table-wrap { overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   th { text-align: left; padding: 10px 12px; color: #6b7280; font-weight: 500; border-bottom: 1px solid #2a2a2a; white-space: nowrap; }
-  td { padding: 12px 12px; border-bottom: 1px solid #1f1f1f; color: #e5e7eb; vertical-align: top; }
+  td { padding: 11px 12px; border-bottom: 1px solid #1f1f1f; color: #e5e7eb; vertical-align: middle; }
   tr:last-child td { border-bottom: none; }
   tr:hover td { background: #1f1f1f; }
   .empty { text-align: center; padding: 3rem; color: #4b5563; font-size: 14px; }
+  .badge-confirme { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: rgba(52,211,153,0.12); color: #34d399; border: 1px solid rgba(52,211,153,0.25); white-space: nowrap; }
+  .badge-brouillon { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: rgba(245,158,11,0.12); color: #f59e0b; border: 1px solid rgba(245,158,11,0.25); white-space: nowrap; }
   .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
   .tag-blue { background: rgba(99,102,241,0.15); color: #818cf8; }
   .progress-mini { height: 6px; background: #2a2a2a; border-radius: 3px; margin-top: 0.5rem; }
@@ -59,8 +70,10 @@
   #alert-box { display: none; }
   .wa-link { color: #34d399; text-decoration: none; }
   .wa-link:hover { text-decoration: underline; }
+  .question-cell { font-size: 12px; color: #9ca3af; font-style: italic; max-width: 150px; }
   .spinner { width: 24px; height: 24px; border: 3px solid #2a2a2a; border-top-color: #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; }
   @keyframes spin { to { transform: rotate(360deg); } }
+  .actions-cell { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
   .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem; }
   .login-card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; padding: 2.5rem; width: 100%; max-width: 380px; text-align: center; }
   .login-icon { font-size: 48px; margin-bottom: 1rem; }
@@ -71,38 +84,44 @@
   .login-input::placeholder { color: #4b5563; letter-spacing: 0; }
   .login-btn { width: 100%; padding: 13px; background: #6366f1; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.15s; }
   .login-btn:hover { background: #4f46e5; }
+  .login-btn:disabled { opacity: 0.5; cursor: not-allowed; }
   .login-error { font-size: 13px; color: #f87171; margin-top: 0.75rem; display: none; }
 </style>
 </head>
 <body>
 
-<!-- Écran de connexion -->
 <div class="login-wrap" id="login-screen">
   <div class="login-card">
     <div class="login-icon">🔐</div>
     <div class="login-title">Espace Admin</div>
     <div class="login-sub">Stream Source — Accès restreint</div>
     <input type="password" class="login-input" id="password-input" placeholder="Mot de passe..." onkeydown="if(event.key==='Enter') checkPassword()" />
-    <button class="login-btn" onclick="checkPassword()">Accéder →</button>
-    <div class="login-error" id="login-error">❌ Mot de passe incorrect</div>
+    <button class="login-btn" id="login-btn" onclick="checkPassword()">Accéder →</button>
+    <div class="login-error" id="login-error"></div>
   </div>
 </div>
 
-<!-- Contenu Admin (caché jusqu'à connexion) -->
 <div id="admin-content" style="display:none;">
 <div class="wrap">
   <div class="admin-header">
     <div class="admin-title">🎬 Stream Source <span>— Admin</span></div>
-    <span class="badge-admin">🔒 Espace privé</span>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <span class="badge-admin">🔒 Espace privé</span>
+      <button class="btn btn-outline btn-sm" onclick="logout()">Déconnexion</button>
+    </div>
   </div>
 
   <div id="alert-box" class="alert"></div>
 
   <div class="stats">
     <div class="stat-card">
-      <div class="stat-label">Inscrits</div>
-      <div class="stat-value accent" id="stat-inscrits">—</div>
+      <div class="stat-label">✅ Confirmés (places prises)</div>
+      <div class="stat-value accent" id="stat-confirmes">—</div>
       <div class="progress-mini"><div class="progress-mini-fill" id="progress-mini" style="width:0%"></div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">⏳ Brouillons (pas rejoints)</div>
+      <div class="stat-value orange" id="stat-brouillons">—</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Limite actuelle</div>
@@ -142,18 +161,25 @@
 
   <div class="section">
     <div class="section-title">
-      <span>📋 Réponses reçues (<span id="count-label">0</span>)</span>
+      <span>📋 Réponses (<span id="count-label">0</span>)</span>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <button class="btn btn-success btn-sm" onclick="exportCSV()">Exporter CSV</button>
         <button class="btn btn-danger btn-sm" onclick="clearAll()">Tout effacer</button>
         <button class="btn btn-outline btn-sm" onclick="loadData()">🔄 Actualiser</button>
       </div>
     </div>
+    <div class="filters">
+      <button class="filter-btn active" onclick="setFilter('tous', this)">Tous</button>
+      <button class="filter-btn" onclick="setFilter('confirmé', this)">✅ Confirmés</button>
+      <button class="filter-btn" onclick="setFilter('brouillon', this)">⏳ Brouillons</button>
+      <button class="filter-btn" onclick="setFilter('question', this)">💬 Avec question</button>
+    </div>
     <div class="table-wrap">
       <table>
         <thead>
           <tr>
             <th>#</th>
+            <th>Statut</th>
             <th>Date</th>
             <th>Prénom</th>
             <th>WhatsApp</th>
@@ -164,15 +190,17 @@
             <th>Statut social</th>
             <th>Entourage</th>
             <th>Prêt</th>
-            <th>Action</th>
+            <th>💬 Question</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody id="responses-body">
-          <tr><td colspan="12" class="empty"><div class="spinner"></div></td></tr>
+          <tr><td colspan="14" class="empty"><div class="spinner"></div></td></tr>
         </tbody>
       </table>
     </div>
   </div>
+</div>
 </div>
 
 <script>
@@ -180,9 +208,57 @@ const SUPABASE_URL = 'https://vmggidzgzkbgrmyjllzv.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtZ2dpZHpnemtiZ3JteWpsbHp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyNzQzMTcsImV4cCI6MjEwMTg1MDMxN30.jRg4e9TlYrHgJUljT68i0aCtkYMZ8uMb3p5Itu3DpdE';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let currentConfig = { limite: 30, active: true };
-let currentResponses = [];
+const WA_GROUP_LINK = 'https://chat.whatsapp.com/Lx6TtWQkNpzEmPk4mOcog8?s=cl&p=a&mlu=4';
 
+let currentConfig = { limite: 30, active: true };
+let allResponses = [];
+let currentFilter = 'tous';
+let autoRefreshInterval = null;
+
+// ── Auth via Supabase ────────────────────────────────────────────
+async function checkPassword() {
+  const input = document.getElementById('password-input').value;
+  const errorEl = document.getElementById('login-error');
+  if (!input) return;
+
+  try {
+    const { data, error } = await sb
+      .from('admin_config')
+      .select('password')
+      .eq('id', 1)
+      .single();
+
+    if (error || !data) throw new Error('Erreur');
+
+    if (input === data.password) {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('admin-content').style.display = 'block';
+      sessionStorage.setItem('ss_admin', 'true');
+      startAutoRefresh();
+      loadData();
+    } else {
+      errorEl.textContent = '❌ Mot de passe incorrect';
+      errorEl.style.display = 'block';
+      document.getElementById('password-input').value = '';
+      document.getElementById('password-input').focus();
+      setTimeout(() => errorEl.style.display = 'none', 3000);
+    }
+  } catch(e) {
+    errorEl.textContent = '❌ Erreur de connexion, réessaie.';
+    errorEl.style.display = 'block';
+    setTimeout(() => errorEl.style.display = 'none', 3000);
+  }
+}
+
+function logout() {
+  sessionStorage.removeItem('ss_admin');
+  clearInterval(autoRefreshInterval);
+  document.getElementById('admin-content').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('password-input').value = '';
+}
+
+// ── Données ──────────────────────────────────────────────────────
 function showAlert(msg, type) {
   const box = document.getElementById('alert-box');
   box.className = 'alert alert-' + type;
@@ -191,56 +267,116 @@ function showAlert(msg, type) {
   setTimeout(() => box.style.display = 'none', 3000);
 }
 
+function setFilter(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTable();
+}
+
+function startAutoRefresh() {
+  clearInterval(autoRefreshInterval);
+  autoRefreshInterval = setInterval(loadData, 10000);
+}
+
 async function loadData() {
   try {
     const { data: config } = await sb.from('config').select('*').eq('id', 1).single();
-    const { data: responses, count } = await sb.from('reponses').select('*', { count: 'exact' }).order('date', { ascending: false });
+    const { data: responses } = await sb.from('reponses').select('*').order('date', { ascending: false });
 
     currentConfig = config;
-    currentResponses = responses || [];
+    allResponses = responses || [];
 
-    const total = count || 0;
-    const remaining = Math.max(0, config.limite - total);
-    const pct = config.limite > 0 ? Math.min(100, Math.round((total / config.limite) * 100)) : 0;
+    const confirmes = allResponses.filter(r => r.statut === 'confirmé').length;
+    const brouillons = allResponses.filter(r => r.statut !== 'confirmé').length;
+    const remaining = Math.max(0, config.limite - confirmes);
+    const pct = config.limite > 0 ? Math.min(100, Math.round((confirmes / config.limite) * 100)) : 0;
 
-    document.getElementById('stat-inscrits').textContent = total;
+    document.getElementById('stat-confirmes').textContent = confirmes;
+    document.getElementById('stat-brouillons').textContent = brouillons;
     document.getElementById('stat-limit').textContent = config.limite;
     document.getElementById('stat-remaining').textContent = remaining;
-    document.getElementById('stat-status').textContent = config.active ? (total >= config.limite ? '🔴 Complet' : '🟢 Ouvert') : '🔴 Fermé';
+    document.getElementById('stat-status').textContent = config.active
+      ? (confirmes >= config.limite ? '🔴 Complet' : '🟢 Ouvert')
+      : '🔴 Fermé';
     document.getElementById('progress-mini').style.width = pct + '%';
     document.getElementById('limit-input').value = config.limite;
     document.getElementById('active-toggle').checked = config.active;
     document.getElementById('toggle-label').textContent = config.active ? 'Formulaire actif' : 'Formulaire désactivé';
-    document.getElementById('count-label').textContent = total;
+    document.getElementById('count-label').textContent = allResponses.length;
 
-    renderTable(currentResponses);
+    renderTable();
   } catch (e) {
     showAlert('Erreur de chargement', 'danger');
   }
 }
 
-function renderTable(responses) {
+function formatDate(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleString('fr-FR', { day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit' });
+}
+
+function renderTable() {
+  let filtered = allResponses;
+  if (currentFilter === 'confirmé') filtered = allResponses.filter(r => r.statut === 'confirmé');
+  else if (currentFilter === 'brouillon') filtered = allResponses.filter(r => r.statut !== 'confirmé');
+  else if (currentFilter === 'question') filtered = allResponses.filter(r => r.question && r.question.trim() !== '');
+
   const tbody = document.getElementById('responses-body');
-  if (!responses || responses.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="12" class="empty">Aucune réponse pour le moment</td></tr>';
+  if (!filtered || filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="14" class="empty">Aucune réponse</td></tr>';
     return;
   }
-  tbody.innerHTML = responses.map((r, i) => `
-    <tr>
-      <td><span class="tag tag-blue">${i + 1}</span></td>
-      <td style="color:#6b7280;white-space:nowrap;font-size:12px;">${new Date(r.date).toLocaleString('fr-FR')}</td>
-      <td style="font-weight:600;">${r.prenom || '—'}</td>
-      <td><a class="wa-link" href="https://wa.me/${(r.whatsapp||'').replace(/\D/g,'')}" target="_blank">${r.whatsapp || '—'}</a></td>
-      <td style="font-size:12px;max-width:100px;">${r.q2 || '—'}</td>
-      <td style="font-size:12px;">${r.q3 || '—'}</td>
-      <td style="font-size:12px;">${r.q4 || '—'}</td>
-      <td style="font-size:12px;">${r.q5 || '—'}</td>
-      <td style="font-size:12px;">${r.q6 || '—'}</td>
-      <td style="font-size:12px;">${r.q7 || '—'}</td>
-      <td style="font-size:12px;">${r.q8 || '—'}</td>
-      <td><button class="btn btn-danger btn-sm" onclick="deleteEntry(${r.id})">✕</button></td>
-    </tr>
-  `).join('');
+
+  tbody.innerHTML = filtered.map((r, i) => {
+    const isConfirme = r.statut === 'confirmé';
+    const statusBadge = isConfirme
+      ? '<span class="badge-confirme">✅ Confirmé</span>'
+      : '<span class="badge-brouillon">⏳ Brouillon</span>';
+
+    const numClean = (r.whatsapp || '').replace(/\D/g, '');
+    const msgRelance = encodeURIComponent(
+      `Salut ${r.prenom || ''} ! 👋\nJ'ai bien vu ta candidature pour Stream Source 💎\nTa place est toujours réservée mais les autres arrivent vite... 👀\nRejoins le groupe maintenant avant qu'il soit trop tard 👇\n${WA_GROUP_LINK}`
+    );
+    const waRelanceLink = `https://wa.me/${numClean}?text=${msgRelance}`;
+
+    return `
+      <tr>
+        <td><span class="tag tag-blue">${i + 1}</span></td>
+        <td>${statusBadge}</td>
+        <td style="color:#6b7280;white-space:nowrap;font-size:12px;">${formatDate(r.date)}</td>
+        <td style="font-weight:600;">${r.prenom || '—'}</td>
+        <td><a class="wa-link" href="https://wa.me/${numClean}" target="_blank">${r.whatsapp || '—'}</a></td>
+        <td style="font-size:12px;max-width:120px;">${r.q2 || '—'}</td>
+        <td style="font-size:12px;">${r.q3 || '—'}</td>
+        <td style="font-size:12px;">${r.q4 || '—'}</td>
+        <td style="font-size:12px;">${r.q5 || '—'}</td>
+        <td style="font-size:12px;">${r.q6 || '—'}</td>
+        <td style="font-size:12px;">${r.q7 || '—'}</td>
+        <td style="font-size:12px;">${r.q8 || '—'}</td>
+        <td class="question-cell">${r.question && r.question.trim() ? `💬 ${r.question}` : '<span style="color:#374151;">—</span>'}</td>
+        <td>
+          <div class="actions-cell">
+            ${!isConfirme ? `
+              <a href="${waRelanceLink}" target="_blank">
+                <button class="btn btn-wa btn-sm">📲 Relancer</button>
+              </a>
+              <button class="btn btn-confirm btn-sm" onclick="confirmManual(${r.id})">✅</button>
+            ` : ''}
+            <button class="btn btn-danger btn-sm" onclick="deleteEntry(${r.id})">✕</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// ── Actions ──────────────────────────────────────────────────────
+async function confirmManual(id) {
+  if (!confirm('Confirmer manuellement cette personne ?')) return;
+  await sb.from('reponses').update({ statut: 'confirmé' }).eq('id', id);
+  showAlert('✅ Confirmé manuellement', 'success');
+  loadData();
 }
 
 async function saveLimit() {
@@ -280,12 +416,11 @@ async function clearAll() {
 }
 
 function exportCSV() {
-  if (currentResponses.length === 0) { showAlert('Aucune réponse à exporter', 'danger'); return; }
-  const headers = ['#','Date','Prénom','WhatsApp','Dépenses','Coupé abo','Intérêt prix','Business','Statut social','Entourage','Prêt'];
-  const rows = currentResponses.map((r, i) => [
-    i+1,
-    new Date(r.date).toLocaleString('fr-FR'),
-    r.prenom, r.whatsapp, r.q2, r.q3, r.q4, r.q5, r.q6, r.q7, r.q8
+  if (allResponses.length === 0) { showAlert('Aucune réponse à exporter', 'danger'); return; }
+  const headers = ['#','Statut','Date','Prénom','WhatsApp','Dépenses','Coupé abo','Intérêt prix','Business','Statut social','Entourage','Prêt','Question'];
+  const rows = allResponses.map((r, i) => [
+    i+1, r.statut || 'brouillon', formatDate(r.date),
+    r.prenom, r.whatsapp, r.q2, r.q3, r.q4, r.q5, r.q6, r.q7, r.q8, r.question
   ].map(v => '"' + (v||'').toString().replace(/"/g,'""') + '"').join(','));
   const csv = [headers.join(','), ...rows].join('\n');
   const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
@@ -296,30 +431,14 @@ function exportCSV() {
   showAlert('Export CSV téléchargé !', 'success');
 }
 
-loadData();
-setInterval(loadData, 10000);
-
-function checkPassword() {
-  const input = document.getElementById('password-input').value;
-  const error = document.getElementById('login-error');
-  if (input === '100200#') {
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('admin-content').style.display = 'block';
-    sessionStorage.setItem('ss_admin', 'true');
-  } else {
-    error.style.display = 'block';
-    document.getElementById('password-input').value = '';
-    document.getElementById('password-input').focus();
-    setTimeout(() => error.style.display = 'none', 3000);
-  }
-}
-
-// Vérifier si déjà connecté dans cette session
+// ── Init ─────────────────────────────────────────────────────────
 if (sessionStorage.getItem('ss_admin') === 'true') {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('admin-content').style.display = 'block';
+  startAutoRefresh();
+  loadData();
 }
 </script>
-</div> <!-- fin admin-content -->
+</div>
 </body>
 </html>
