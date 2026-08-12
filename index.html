@@ -11,11 +11,21 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f0f; color: #fff; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem; }
   .wrap { max-width: 580px; width: 100%; }
-  .header { text-align: center; margin-bottom: 2rem; }
-  .badge { display: inline-block; background: rgba(99,102,241,0.15); color: #818cf8; font-size: 12px; padding: 5px 14px; border-radius: 20px; border: 1px solid rgba(99,102,241,0.3); margin-bottom: 1.2rem; }
+  .header { text-align: center; margin-bottom: 1.5rem; }
+  .badge { display: inline-block; background: rgba(99,102,241,0.15); color: #818cf8; font-size: 12px; padding: 5px 14px; border-radius: 20px; border: 1px solid rgba(99,102,241,0.3); margin-bottom: 1rem; }
   .header h1 { font-size: 32px; font-weight: 700; background: linear-gradient(135deg, #fff 0%, #818cf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem; }
   .header p { font-size: 15px; color: #9ca3af; line-height: 1.6; }
-  .progress-bar { height: 4px; background: #1f1f1f; border-radius: 2px; margin-bottom: 2rem; overflow: hidden; }
+
+  /* Timer */
+  .timer-wrap { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); border-radius: 12px; padding: 12px 16px; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+  .timer-label { font-size: 12px; color: #f87171; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+  .timer-blocks { display: flex; gap: 8px; align-items: center; }
+  .timer-block { text-align: center; background: rgba(239,68,68,0.1); border-radius: 8px; padding: 6px 10px; min-width: 48px; }
+  .timer-num { font-size: 20px; font-weight: 700; color: #f87171; line-height: 1; }
+  .timer-unit { font-size: 9px; color: #9ca3af; text-transform: uppercase; margin-top: 2px; }
+  .timer-sep { font-size: 18px; color: #f87171; font-weight: 700; margin-bottom: 8px; }
+
+  .progress-bar { height: 4px; background: #1f1f1f; border-radius: 2px; margin-bottom: 1.5rem; overflow: hidden; }
   .progress-fill { height: 100%; background: linear-gradient(90deg, #6366f1, #818cf8); border-radius: 2px; transition: width 0.4s ease; }
   .card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; padding: 1.75rem; margin-bottom: 1rem; }
   .q-num { font-size: 12px; color: #6366f1; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.6rem; }
@@ -34,7 +44,7 @@
   textarea:focus { border-color: #6366f1; }
   textarea::placeholder { color: #4b5563; }
 
-  /* intl-tel-input overrides */
+  /* intl-tel-input */
   .iti { width: 100%; margin-top: 1rem; }
   .iti__tel-input { width: 100%; padding: 13px 16px 13px 52px; background: #111; border: 1px solid #2a2a2a; border-radius: 10px; font-size: 15px; color: #fff; font-family: inherit; outline: none; transition: border-color 0.15s; }
   .iti__tel-input:focus { border-color: #6366f1; }
@@ -52,29 +62,25 @@
   .iti__dial-code { color: #6b7280; }
   .phone-error { font-size: 12px; color: #ef4444; margin-top: 6px; display: none; }
 
-  .btn { width: 100%; padding: 15px; background: #6366f1; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 1rem; transition: all 0.15s; font-family: inherit; }
+  /* Boutons */
+  .btn-row { display: flex; gap: 10px; margin-top: 1rem; }
+  .btn { flex: 1; padding: 15px; background: #6366f1; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.15s; font-family: inherit; }
   .btn:hover:not(:disabled) { background: #4f46e5; transform: translateY(-1px); }
   .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .btn-back { flex: 0 0 auto; padding: 15px 18px; background: transparent; color: #6b7280; border: 1px solid #2a2a2a; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.15s; font-family: inherit; }
+  .btn-back:hover { border-color: #6366f1; color: #818cf8; }
   .step { display: none; }
   .step.active { display: block; }
-  .already-card { text-align: center; padding: 3rem 2rem; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; }
-  .already-icon { font-size: 52px; margin-bottom: 1rem; }
-  .already-title { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 0.75rem; }
-  .already-text { font-size: 14px; color: #9ca3af; line-height: 1.6; }
-  .closed-card { text-align: center; padding: 3rem 2rem; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; }
-  .closed-icon { font-size: 52px; margin-bottom: 1rem; }
-  .closed-title { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 0.75rem; }
-  .closed-text { font-size: 14px; color: #9ca3af; line-height: 1.6; }
-  .success-card { text-align: center; padding: 2.5rem 2rem; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; }
-  .success-icon { font-size: 52px; margin-bottom: 1rem; }
-  .success-title { font-size: 24px; font-weight: 700; color: #fff; margin-bottom: 0.75rem; }
-  .success-text { font-size: 14px; color: #9ca3af; line-height: 1.6; margin-bottom: 1.75rem; }
+  .already-card, .closed-card, .success-card { text-align: center; padding: 2.5rem 2rem; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; }
+  .card-icon { font-size: 52px; margin-bottom: 1rem; }
+  .card-title { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 0.75rem; }
+  .card-text { font-size: 14px; color: #9ca3af; line-height: 1.6; margin-bottom: 1.5rem; }
   .btn-wa { display: inline-flex; align-items: center; gap: 10px; padding: 15px 30px; background: #25D366; color: #fff; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; border: none; font-family: inherit; width: auto; margin-top: 0; transition: all 0.15s; }
   .btn-wa:hover:not(:disabled) { background: #1ebe5d; transform: translateY(-1px); }
   .btn-wa:disabled { opacity: 0.6; cursor: not-allowed; }
   .wa-joined { font-size: 13px; color: #34d399; margin-top: 1rem; display: none; }
   .wa-note { font-size: 12px; color: #4b5563; margin-top: 1rem; }
-  .counter { font-size: 12px; color: #4b5563; text-align: center; margin-bottom: 1.5rem; }
+  .counter { font-size: 12px; color: #4b5563; text-align: center; margin-bottom: 1rem; }
   .counter span { color: #6366f1; font-weight: 600; }
   .loading { text-align: center; padding: 3rem; color: #4b5563; }
   .spinner { width: 32px; height: 32px; border: 3px solid #2a2a2a; border-top-color: #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1rem; }
@@ -91,19 +97,34 @@
     <p>Réponds à quelques questions pour rejoindre le groupe privé et découvrir comment accéder à toutes tes plateformes à prix mini.</p>
   </div>
 
+  <!-- Timer compte à rebours -->
+  <div class="timer-wrap" id="timer-wrap" style="display:none;">
+    <span class="timer-label">⏳ Fermeture dans</span>
+    <div class="timer-blocks">
+      <div class="timer-block"><div class="timer-num" id="t-days">--</div><div class="timer-unit">jours</div></div>
+      <span class="timer-sep">:</span>
+      <div class="timer-block"><div class="timer-num" id="t-hours">--</div><div class="timer-unit">heures</div></div>
+      <span class="timer-sep">:</span>
+      <div class="timer-block"><div class="timer-num" id="t-min">--</div><div class="timer-unit">min</div></div>
+      <span class="timer-sep">:</span>
+      <div class="timer-block"><div class="timer-num" id="t-sec">--</div><div class="timer-unit">sec</div></div>
+    </div>
+  </div>
+
   <div class="counter" id="counter"></div>
   <div class="progress-bar"><div class="progress-fill" id="progress" style="width:11.1%"></div></div>
 
+  <!-- Chargement -->
   <div class="step active" id="step-loading">
     <div class="loading"><div class="spinner"></div>Chargement...</div>
   </div>
 
+  <!-- Déjà inscrit -->
   <div class="step" id="step-already">
     <div class="already-card">
-      <div class="already-icon">👋</div>
-      <div class="already-title">Tu es déjà inscrit !</div>
-      <div class="already-text">Tu as déjà rempli le formulaire.<br>Rejoins le groupe WhatsApp si ce n'est pas encore fait.</div>
-      <br>
+      <div class="card-icon">🔔</div>
+      <div class="card-title">Tu es déjà inscrit !</div>
+      <div class="card-text">Tu as déjà rempli le formulaire.<br>Rejoins le groupe WhatsApp si ce n'est pas encore fait.</div>
       <button class="btn-wa" onclick="window.open('https://chat.whatsapp.com/Lx6TtWQkNpzEmPk4mOcog8?s=cl&p=a&mlu=4','_blank')" style="margin:0 auto;">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
         Rejoindre le groupe
@@ -111,42 +132,48 @@
     </div>
   </div>
 
+  <!-- Fermé -->
   <div class="step" id="step-closed">
     <div class="closed-card">
-      <div class="closed-icon">🔒</div>
-      <div class="closed-title">Le groupe est complet !</div>
-      <div class="closed-text">Toutes les places ont été prises.<br>Reste à l'affût pour la prochaine ouverture.</div>
+      <div class="card-icon">🔒</div>
+      <div class="card-title">Le groupe est complet !</div>
+      <div class="card-text">Toutes les places ont été prises ou les inscriptions sont terminées.<br>Reste à l'affût pour la prochaine ouverture.</div>
     </div>
   </div>
 
-  <!-- Question 1 -->
+  <!-- Q1 -->
   <div class="step" id="step-1">
     <div class="card">
       <div class="q-num">Question 1 sur 8</div>
       <div class="q-text">Avant tout, dis-moi qui tu es !</div>
       <input type="text" id="prenom" placeholder="Ton prénom..." />
     </div>
-    <button class="btn" onclick="nextStep(1)">Continuer →</button>
+    <div class="btn-row">
+      <button class="btn" onclick="nextStep(1)">Continuer →</button>
+    </div>
   </div>
 
-  <!-- Question 2 -->
+  <!-- Q2 -->
   <div class="step" id="step-2">
     <div class="card">
       <div class="q-num">Question 2 sur 8</div>
       <div class="q-text" id="q2-title">Combien tu claques par mois en abonnements streaming ?</div>
       <div class="q-sub">Netflix, Prime Video, Spotify, Canva...</div>
       <div class="options">
-        <div class="option" onclick="selectOption(this,'q2')"><span class="option-emoji">😐</span><span class="option-text">Moins de 5 000 FCFA</span></div>
+        <div class="option" onclick="selectOption(this,'q2')"><span class="option-emoji">😅</span><span class="option-text">Moins de 5 000 FCFA</span></div>
         <div class="option" onclick="selectOption(this,'q2')"><span class="option-emoji">😬</span><span class="option-text">Entre 5 000 et 15 000 FCFA</span></div>
-        <div class="option" onclick="selectOption(this,'q2')"><span class="option-emoji">😩</span><span class="option-text">Plus de 15 000 FCFA</span></div>
-        <div class="option" onclick="selectOption(this,'q2')"><span class="option-emoji">😔</span><span class="option-text">Pas d'abonnement, trop cher pour moi</span></div>
+        <div class="option" onclick="selectOption(this,'q2')"><span class="option-emoji">😤</span><span class="option-text">Plus de 15 000 FCFA</span></div>
+        <div class="option" onclick="selectOption(this,'q2')"><span class="option-emoji">😞</span><span class="option-text">Pas d'abonnement, trop cher pour moi</span></div>
       </div>
       <div class="select-hint" id="hint-q2">👆 Sélectionne une réponse pour continuer</div>
     </div>
-    <button class="btn" id="btn-2" onclick="nextStepWithValidation(2,'q2')" disabled>Continuer →</button>
+    <div class="btn-row">
+      <button class="btn-back" onclick="goBack(2)">← Retour</button>
+      <button class="btn" id="btn-2" onclick="nextStepWithValidation(2,'q2')" disabled>Continuer →</button>
+    </div>
   </div>
 
-  <!-- Question 3 -->
+  <!-- Q3 -->
   <div class="step" id="step-3">
     <div class="card">
       <div class="q-num">Question 3 sur 8</div>
@@ -158,10 +185,13 @@
       </div>
       <div class="select-hint" id="hint-q3">👆 Sélectionne une réponse pour continuer</div>
     </div>
-    <button class="btn" id="btn-3" onclick="nextStepWithValidation(3,'q3')" disabled>Continuer →</button>
+    <div class="btn-row">
+      <button class="btn-back" onclick="goBack(3)">← Retour</button>
+      <button class="btn" id="btn-3" onclick="nextStepWithValidation(3,'q3')" disabled>Continuer →</button>
+    </div>
   </div>
 
-  <!-- Question 4 -->
+  <!-- Q4 -->
   <div class="step" id="step-4">
     <div class="card">
       <div class="q-num">Question 4 sur 8</div>
@@ -173,10 +203,13 @@
       </div>
       <div class="select-hint" id="hint-q4">👆 Sélectionne une réponse pour continuer</div>
     </div>
-    <button class="btn" id="btn-4" onclick="nextStepWithValidation(4,'q4')" disabled>Continuer →</button>
+    <div class="btn-row">
+      <button class="btn-back" onclick="goBack(4)">← Retour</button>
+      <button class="btn" id="btn-4" onclick="nextStepWithValidation(4,'q4')" disabled>Continuer →</button>
+    </div>
   </div>
 
-  <!-- Question 5 -->
+  <!-- Q5 -->
   <div class="step" id="step-5">
     <div class="card">
       <div class="q-num">Question 5 sur 8</div>
@@ -184,44 +217,53 @@
       <div class="options">
         <div class="option" onclick="selectOption(this,'q5')"><span class="option-emoji">🚀</span><span class="option-text">Oui je veux les deux : économiser ET gagner !</span></div>
         <div class="option" onclick="selectOption(this,'q5')"><span class="option-emoji">💡</span><span class="option-text">Pourquoi pas, je suis curieux</span></div>
-        <div class="option" onclick="selectOption(this,'q5')"><span class="option-emoji">🎯</span><span class="option-text">Non merci, juste économiser me suffit</span></div>
+        <div class="option" onclick="selectOption(this,'q5')"><span class="option-emoji">🙅</span><span class="option-text">Non merci, juste économiser me suffit</span></div>
       </div>
       <div class="select-hint" id="hint-q5">👆 Sélectionne une réponse pour continuer</div>
     </div>
-    <button class="btn" id="btn-5" onclick="nextStepWithValidation(5,'q5')" disabled>Continuer →</button>
+    <div class="btn-row">
+      <button class="btn-back" onclick="goBack(5)">← Retour</button>
+      <button class="btn" id="btn-5" onclick="nextStepWithValidation(5,'q5')" disabled>Continuer →</button>
+    </div>
   </div>
 
-  <!-- Question 6 -->
+  <!-- Q6 -->
   <div class="step" id="step-6">
     <div class="card">
       <div class="q-num">Question 6 sur 8</div>
       <div class="q-text">Dans ton cercle, tu es plutôt quel type de personne ?</div>
       <div class="options">
-        <div class="option" onclick="selectOption(this,'q6')"><span class="option-emoji">😎</span><span class="option-text">Celui qu'on appelle quand on a besoin d'un bon plan</span></div>
-        <div class="option" onclick="selectOption(this,'q6')"><span class="option-emoji">🤷</span><span class="option-text">Parfois on me demande des conseils</span></div>
+        <div class="option" onclick="selectOption(this,'q6')"><span class="option-emoji">🤝</span><span class="option-text">Celui qu'on appelle quand on a besoin d'un bon plan</span></div>
+        <div class="option" onclick="selectOption(this,'q6')"><span class="option-emoji">🙂</span><span class="option-text">Parfois on me demande des conseils</span></div>
         <div class="option" onclick="selectOption(this,'q6')"><span class="option-emoji">🙈</span><span class="option-text">Pas vraiment, je suis plutôt discret</span></div>
       </div>
       <div class="select-hint" id="hint-q6">👆 Sélectionne une réponse pour continuer</div>
     </div>
-    <button class="btn" id="btn-6" onclick="nextStepWithValidation(6,'q6')" disabled>Continuer →</button>
+    <div class="btn-row">
+      <button class="btn-back" onclick="goBack(6)">← Retour</button>
+      <button class="btn" id="btn-6" onclick="nextStepWithValidation(6,'q6')" disabled>Continuer →</button>
+    </div>
   </div>
 
-  <!-- Question 7 -->
+  <!-- Q7 -->
   <div class="step" id="step-7">
     <div class="card">
       <div class="q-num">Question 7 sur 8</div>
       <div class="q-text">Des amis ou ta famille te demandent comment accéder à Netflix pas cher ?</div>
       <div class="options">
         <div class="option" onclick="selectOption(this,'q7')"><span class="option-emoji">😅</span><span class="option-text">Oui souvent et je ne sais jamais quoi leur dire</span></div>
-        <div class="option" onclick="selectOption(this,'q7')"><span class="option-emoji">🤔</span><span class="option-text">Oui parfois ça arrive</span></div>
-        <div class="option" onclick="selectOption(this,'q7')"><span class="option-emoji">💪</span><span class="option-text">Non mais j'adorerais pouvoir les aider !</span></div>
+        <div class="option" onclick="selectOption(this,'q7')"><span class="option-emoji">🤷</span><span class="option-text">Oui parfois ça arrive</span></div>
+        <div class="option" onclick="selectOption(this,'q7')"><span class="option-emoji">🙌</span><span class="option-text">Non mais j'adorerais pouvoir les aider !</span></div>
       </div>
       <div class="select-hint" id="hint-q7">👆 Sélectionne une réponse pour continuer</div>
     </div>
-    <button class="btn" id="btn-7" onclick="nextStepWithValidation(7,'q7')" disabled>Continuer →</button>
+    <div class="btn-row">
+      <button class="btn-back" onclick="goBack(7)">← Retour</button>
+      <button class="btn" id="btn-7" onclick="nextStepWithValidation(7,'q7')" disabled>Continuer →</button>
+    </div>
   </div>
 
-  <!-- Question 8 -->
+  <!-- Q8 -->
   <div class="step" id="step-8">
     <div class="card">
       <div class="q-num">Question 8 sur 8</div>
@@ -233,7 +275,10 @@
       </div>
       <div class="select-hint" id="hint-q8">👆 Sélectionne une réponse pour continuer</div>
     </div>
-    <button class="btn" id="btn-8" onclick="nextStepWithValidation(8,'q8')" disabled>Continuer →</button>
+    <div class="btn-row">
+      <button class="btn-back" onclick="goBack(8)">← Retour</button>
+      <button class="btn" id="btn-8" onclick="nextStepWithValidation(8,'q8')" disabled>Continuer →</button>
+    </div>
   </div>
 
   <!-- Étape 9 : Numéro + Question libre -->
@@ -241,29 +286,29 @@
     <div class="card">
       <div class="q-num">Dernière étape !</div>
       <div class="q-text" id="q9-title">Plus qu'une étape pour rejoindre le groupe 🚀</div>
-
-      <div style="margin-top: 1rem;">
-        <div style="font-size:13px; color:#9ca3af; margin-bottom:0.4rem;">📱 Ton numéro WhatsApp</div>
+      <div style="margin-top:1rem;">
+        <div style="font-size:13px;color:#9ca3af;margin-bottom:0.4rem;">📱 Ton numéro WhatsApp</div>
         <input type="tel" id="whatsapp" placeholder="Ton numéro WhatsApp" />
         <div class="phone-error" id="phone-error">⚠️ Numéro invalide, vérifie ton numéro</div>
       </div>
-
-      <div style="margin-top: 1.25rem;">
-        <div style="font-size:13px; color:#6b7280; margin-bottom:0.5rem;">💬 Tu as une question avant de rejoindre ? <span style="color:#4b5563;">(optionnel)</span></div>
+      <div style="margin-top:1.25rem;">
+        <div style="font-size:13px;color:#6b7280;margin-bottom:0.5rem;">💬 Tu as une question avant de rejoindre ? <span style="color:#4b5563;">(optionnel)</span></div>
         <textarea id="question-libre" placeholder="Pose ta question ici..."></textarea>
       </div>
-
       <div class="form-error" id="form-error"></div>
     </div>
-    <button class="btn" id="btn-submit" onclick="submitForm()">Rejoindre Stream Source 🚀</button>
+    <div class="btn-row">
+      <button class="btn-back" onclick="goBack(9)">← Retour</button>
+      <button class="btn" id="btn-submit" onclick="submitForm()">Rejoindre Stream Source 🚀</button>
+    </div>
   </div>
 
   <!-- Succès -->
   <div class="step" id="step-success">
     <div class="success-card">
-      <div class="success-icon">🎉</div>
-      <div class="success-title" id="success-title">Félicitations !</div>
-      <div class="success-text">
+      <div class="card-icon">🎉</div>
+      <div class="card-title" id="success-title">Félicitations !</div>
+      <div class="card-text">
         Tu fais partie des élus ! Clique ci-dessous pour rejoindre le groupe privé <strong>Stream Source</strong> sur WhatsApp.<br><br>
         <span style="color:#f59e0b;font-size:13px;">⚡ Rejoins vite, les places partent rapidement !</span>
       </div>
@@ -281,7 +326,6 @@
 const SUPABASE_URL = 'https://vmggidzgzkbgrmyjllzv.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtZ2dpZHpnemtiZ3JteWpsbHp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyNzQzMTcsImV4cCI6MjEwMTg1MDMxN30.jRg4e9TlYrHgJUljT68i0aCtkYMZ8uMb3p5Itu3DpdE';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
 const WA_GROUP_LINK = 'https://chat.whatsapp.com/Lx6TtWQkNpzEmPk4mOcog8?s=cl&p=a&mlu=4';
 const LS_KEY = 'ss_submitted';
 const TOTAL_STEPS = 9;
@@ -291,9 +335,45 @@ let currentEntryId = null;
 let joinDone = false;
 let prenom = '';
 let currentStep = 1;
+let timerInterval = null;
+let deadline = null;
 const answers = {};
 
-// ── intl-tel-input init ──────────────────────────────────────────
+// ── Timer ────────────────────────────────────────────────────────
+function startTimer(deadlineDate) {
+  if (!deadlineDate) return;
+  deadline = new Date(deadlineDate);
+
+  // Vérifie que la deadline est dans le futur
+  if (new Date() >= deadline) return;
+
+  // Affiche le timer
+  document.getElementById('timer-wrap').style.display = 'flex';
+
+  function tick() {
+    const now = new Date();
+    const diff = deadline - now;
+    if (diff <= 0) {
+      clearInterval(timerInterval);
+      document.getElementById('timer-wrap').innerHTML =
+        '<span style="color:#f87171;font-weight:600;">🔒 Les inscriptions sont terminées</span>';
+      return;
+    }
+    const days  = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const mins  = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const secs  = Math.floor((diff % (1000 * 60)) / 1000);
+    document.getElementById('t-days').textContent  = String(days).padStart(2,'0');
+    document.getElementById('t-hours').textContent = String(hours).padStart(2,'0');
+    document.getElementById('t-min').textContent   = String(mins).padStart(2,'0');
+    document.getElementById('t-sec').textContent   = String(secs).padStart(2,'0');
+  }
+
+  tick();
+  timerInterval = setInterval(tick, 1000);
+}
+
+// ── intl-tel-input ───────────────────────────────────────────────
 function initPhoneInput() {
   const input = document.getElementById('whatsapp');
   itiInstance = window.intlTelInput(input, {
@@ -305,21 +385,11 @@ function initPhoneInput() {
   });
 }
 
-function getFullNumber() {
-  return itiInstance.getNumber();
-}
-
-// ── Validation numéro béninois ───────────────────────────────────
+// ── Validation numéro ────────────────────────────────────────────
 function isValidPhone() {
   const input = document.getElementById('whatsapp');
   let val = input.value.trim();
-
-  // Si ça commence par 01, on retire le 01 pour revenir à l'ancienne norme
-  // que la lib connaît déjà (+229 + 8 chiffres)
-  if (val.startsWith('01')) {
-    input.value = val.substring(2);
-  }
-
+  if (val.startsWith('01')) { input.value = val.substring(2); }
   return itiInstance.isValidNumber();
 }
 
@@ -327,42 +397,37 @@ function showPhoneError() {
   document.getElementById('phone-error').style.display = 'block';
   document.getElementById('whatsapp').classList.add('error');
 }
-
 function clearPhoneError() {
   document.getElementById('phone-error').style.display = 'none';
   document.getElementById('whatsapp').classList.remove('error');
 }
-
 function showFormError(msg) {
   const el = document.getElementById('form-error');
   el.textContent = msg;
   el.style.display = 'block';
 }
-
 function clearFormError() {
   document.getElementById('form-error').style.display = 'none';
 }
 
 // ── Anti-spam ────────────────────────────────────────────────────
-function checkAlreadySubmitted() {
-  return localStorage.getItem(LS_KEY) === 'true';
-}
-
-function markAsSubmitted() {
-  localStorage.setItem(LS_KEY, 'true');
-}
+function checkAlreadySubmitted() { return localStorage.getItem(LS_KEY) === 'true'; }
+function markAsSubmitted() { localStorage.setItem(LS_KEY, 'true'); }
 
 // ── Disponibilité ────────────────────────────────────────────────
 async function checkAvailability() {
-  if (checkAlreadySubmitted()) {
-    document.getElementById('step-loading').classList.remove('active');
-    document.getElementById('step-already').classList.add('active');
-    document.getElementById('progress').style.width = '100%';
-    return;
-  }
+  if (checkAlreadySubmitted()) { showStep('already'); return; }
 
   try {
     const { data: config } = await sb.from('config').select('*').eq('id', 1).single();
+
+    // Deadline depuis Supabase
+    if (config.deadline) {
+      const dl = new Date(config.deadline);
+      if (new Date() >= dl) { showStep('closed'); return; }
+      startTimer(config.deadline);
+    }
+
     const { count } = await sb.from('reponses')
       .select('*', { count: 'exact', head: true })
       .eq('statut', 'confirmé');
@@ -376,13 +441,47 @@ async function checkAvailability() {
     }
 
     const remaining = config.limite - count;
-    document.getElementById('badge').textContent = remaining + ' place' + (remaining > 1 ? 's' : '') + ' restante' + (remaining > 1 ? 's' : '');
-    document.getElementById('counter').innerHTML = '<span>' + count + '</span> / ' + config.limite + ' places prises';
+    document.getElementById('badge').textContent =
+      remaining + ' place' + (remaining > 1 ? 's' : '') +
+      ' restante' + (remaining > 1 ? 's' : '');
+    document.getElementById('counter').innerHTML =
+      '<span>' + count + '</span> / ' + config.limite + ' places prises';
     document.getElementById('step-1').classList.add('active');
+
   } catch (e) {
     document.getElementById('step-loading').classList.remove('active');
     document.getElementById('step-1').classList.add('active');
   }
+}
+
+function showStep(name) {
+  document.getElementById('step-loading').classList.remove('active');
+  document.getElementById('step-' + name).classList.add('active');
+  document.getElementById('progress').style.width = '100%';
+}
+
+// ── Tracking abandon ─────────────────────────────────────────────
+async function trackAbandon(step) {
+  if (!currentEntryId) return;
+  try {
+    await sb.from('reponses')
+      .update({ etape_abandon: step })
+      .eq('id', currentEntryId);
+  } catch(e) {}
+}
+
+// ── Créer entrée dès Q1 ──────────────────────────────────────────
+async function createInitialEntry(prenomVal) {
+  if (currentEntryId) return; // déjà créé
+  try {
+    const { data: inserted } = await sb.from('reponses').insert({
+      prenom: prenomVal,
+      whatsapp: '',
+      statut: 'brouillon',
+      etape_abandon: 1
+    }).select().single();
+    if (inserted) currentEntryId = inserted.id;
+  } catch(e) {}
 }
 
 // ── Navigation ───────────────────────────────────────────────────
@@ -390,16 +489,26 @@ function updateProgress(step) {
   document.getElementById('progress').style.width = ((step / TOTAL_STEPS) * 100) + '%';
 }
 
-function nextStep(step) {
+async function nextStep(step) {
   if (step === 1) {
     const val = document.getElementById('prenom').value.trim();
     if (!val) { document.getElementById('prenom').focus(); return; }
     prenom = val;
-    document.getElementById('q2-title').textContent = 'Hey ' + prenom + ' ! Combien tu claques par mois en abonnements streaming ?';
-    document.getElementById('q8-title').textContent = prenom + ', tu es prêt à investir une petite somme pour économiser, aider ton entourage ET gagner de l\'argent ?';
-    document.getElementById('q9-title').textContent = prenom + ', plus qu\'une étape pour rejoindre le groupe 🚀';
-    document.getElementById('success-title').textContent = 'Félicitations ' + prenom + ' ! 🎉';
+
+    // Personnalisation des titres
+    document.getElementById('q2-title').textContent =
+      'Hey ' + prenom + ' ! Combien tu claques par mois en abonnements streaming ?';
+    document.getElementById('q8-title').textContent =
+      prenom + ', tu es prêt à investir une petite somme pour économiser, aider ton entourage ET gagner de l\'argent ?';
+    document.getElementById('q9-title').textContent =
+      prenom + ', plus qu\'une étape pour rejoindre le groupe 🚀';
+    document.getElementById('success-title').textContent =
+      'Félicitations ' + prenom + ' ! 🎉';
+
+    // Création de l'entrée en base dès Q1
+    await createInitialEntry(prenom);
   }
+
   document.getElementById('step-' + step).classList.remove('active');
   currentStep = step + 1;
   document.getElementById('step-' + currentStep).classList.add('active');
@@ -407,26 +516,49 @@ function nextStep(step) {
   window.scrollTo(0, 0);
 }
 
-// Navigation pour les étapes avec choix obligatoire
-function nextStepWithValidation(step, group) {
+async function nextStepWithValidation(step, group) {
   if (!answers[group]) {
     document.getElementById('hint-' + group).style.display = 'block';
     return;
   }
+
+  // Mise à jour de l'étape d'abandon
+  await trackAbandon(step + 1);
+
   document.getElementById('step-' + step).classList.remove('active');
   currentStep = step + 1;
   document.getElementById('step-' + currentStep).classList.add('active');
   updateProgress(currentStep);
   window.scrollTo(0, 0);
+}
+
+// ── Retour ───────────────────────────────────────────────────────
+function goBack(step) {
+  document.getElementById('step-' + step).classList.remove('active');
+  currentStep = step - 1;
+  document.getElementById('step-' + currentStep).classList.add('active');
+  updateProgress(currentStep);
+  window.scrollTo(0, 0);
+
+  // Restaure la sélection visuelle si déjà répondu
+  const groupMap = {2:'q2',3:'q3',4:'q4',5:'q5',6:'q6',7:'q7',8:'q8'};
+  const group = groupMap[currentStep];
+  if (group && answers[group]) {
+    const options = document.querySelectorAll('#step-' + currentStep + ' .option');
+    options.forEach(opt => {
+      if (opt.querySelector('.option-text').textContent === answers[group]) {
+        opt.classList.add('selected');
+      }
+    });
+    const btn = document.getElementById('btn-' + currentStep);
+    if (btn) btn.disabled = false;
+  }
 }
 
 function selectOption(el, group) {
   el.closest('.options').querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
   el.classList.add('selected');
   answers[group] = el.querySelector('.option-text').textContent;
-
-  // Active le bouton continuer et cache le hint
-  const btn = document.getElementById('btn-' + (Object.keys(answers).length + 1));
   const stepNum = ['q2','q3','q4','q5','q6','q7','q8'].indexOf(group) + 2;
   const stepBtn = document.getElementById('btn-' + stepNum);
   if (stepBtn) stepBtn.disabled = false;
@@ -443,15 +575,23 @@ async function submitForm() {
   if (!rawVal) { document.getElementById('whatsapp').focus(); return; }
   if (!isValidPhone()) { showPhoneError(); return; }
 
-  const fullNumber = getFullNumber();
-  const questionLibre = document.getElementById('question-libre').value.trim();
+  // Vérif deadline Supabase
+  if (deadline && new Date() >= deadline) { showStep('closed'); return; }
 
+  const fullNumber = itiInstance.getNumber();
+  const questionLibre = document.getElementById('question-libre').value.trim();
   const btn = document.getElementById('btn-submit');
   btn.disabled = true;
   btn.textContent = 'Envoi en cours...';
 
   try {
     const { data: config } = await sb.from('config').select('*').eq('id', 1).single();
+
+    // Revérif deadline depuis Supabase
+    if (config.deadline && new Date() >= new Date(config.deadline)) {
+      showStep('closed'); return;
+    }
+
     const { count } = await sb.from('reponses')
       .select('*', { count: 'exact', head: true })
       .eq('statut', 'confirmé');
@@ -462,7 +602,7 @@ async function submitForm() {
       return;
     }
 
-    // Vérif doublon numéro
+    // Vérif doublon par numéro
     const { data: existing } = await sb.from('reponses')
       .select('id').eq('whatsapp', fullNumber).limit(1);
 
@@ -473,25 +613,41 @@ async function submitForm() {
       return;
     }
 
-    const { data: inserted, error } = await sb.from('reponses').insert({
-      prenom,
-      whatsapp: fullNumber,
-      q2: answers.q2 || '',
-      q3: answers.q3 || '',
-      q4: answers.q4 || '',
-      q5: answers.q5 || '',
-      q6: answers.q6 || '',
-      q7: answers.q7 || '',
-      q8: answers.q8 || '',
-      question: questionLibre,
-      statut: 'brouillon'
-    }).select().single();
+    // Mise à jour de l'entrée existante (créée à Q1)
+    if (currentEntryId) {
+      await sb.from('reponses').update({
+        whatsapp: fullNumber,
+        q2: answers.q2 || '',
+        q3: answers.q3 || '',
+        q4: answers.q4 || '',
+        q5: answers.q5 || '',
+        q6: answers.q6 || '',
+        q7: answers.q7 || '',
+        q8: answers.q8 || '',
+        question: questionLibre,
+        etape_abandon: 0
+      }).eq('id', currentEntryId);
+    } else {
+      // Fallback : insertion directe si l'entrée Q1 a échoué
+      const { data: inserted, error } = await sb.from('reponses').insert({
+        prenom,
+        whatsapp: fullNumber,
+        q2: answers.q2 || '',
+        q3: answers.q3 || '',
+        q4: answers.q4 || '',
+        q5: answers.q5 || '',
+        q6: answers.q6 || '',
+        q7: answers.q7 || '',
+        q8: answers.q8 || '',
+        question: questionLibre,
+        statut: 'brouillon',
+        etape_abandon: 0
+      }).select().single();
+      if (error || !inserted) throw new Error('Insertion échouée');
+      currentEntryId = inserted.id;
+    }
 
-    if (error || !inserted || !inserted.id) throw new Error('Insertion échouée');
-
-    currentEntryId = inserted.id;
     markAsSubmitted();
-
     document.getElementById('step-9').classList.remove('active');
     document.getElementById('step-success').classList.add('active');
     updateProgress(TOTAL_STEPS);
@@ -504,28 +660,25 @@ async function submitForm() {
   }
 }
 
-// ── Rejoindre → confirmé ─────────────────────────────────────────
+// ── Rejoindre → statut confirmé ──────────────────────────────────
 async function joinGroup() {
   if (joinDone) return;
   joinDone = true;
-
   const btn = document.getElementById('btn-join');
   btn.disabled = true;
   btn.textContent = 'Redirection...';
 
   if (currentEntryId) {
-    try {
-      await sb.from('reponses')
-        .update({ statut: 'confirmé' })
-        .eq('id', currentEntryId);
-    } catch (e) { /* silencieux */ }
+    sb.from('reponses')
+      .update({ statut: 'confirmé' })
+      .eq('id', currentEntryId)
+      .then(() => {});
   }
 
+  window.open(WA_GROUP_LINK, '_blank');
   document.getElementById('wa-joined').style.display = 'block';
   document.getElementById('wa-note').style.display = 'none';
   btn.style.display = 'none';
-
-  window.open(WA_GROUP_LINK, '_blank');
 }
 
 // ── Init ─────────────────────────────────────────────────────────
