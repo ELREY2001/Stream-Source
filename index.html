@@ -78,7 +78,6 @@
   .btn-wa { display: inline-flex; align-items: center; gap: 10px; padding: 15px 30px; background: #25D366; color: #fff; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; border: none; font-family: inherit; width: auto; margin-top: 0; transition: all 0.15s; }
   .btn-wa:hover:not(:disabled) { background: #1ebe5d; transform: translateY(-1px); }
   .btn-wa:disabled { opacity: 0.6; cursor: not-allowed; }
-  .wa-joined { font-size: 13px; color: #34d399; margin-top: 1rem; display: none; }
   .wa-note { font-size: 12px; color: #4b5563; margin-top: 1rem; }
   .counter { font-size: 12px; color: #4b5563; text-align: center; margin-bottom: 1rem; }
   .counter span { color: #6366f1; font-weight: 600; }
@@ -309,15 +308,15 @@
       <div class="card-icon">🎉</div>
       <div class="card-title" id="success-title">Félicitations !</div>
       <div class="card-text">
-        Tu fais partie des élus ! Clique ci-dessous pour rejoindre le groupe privé <strong>Stream Source</strong> sur WhatsApp.<br><br>
-        <span style="color:#f59e0b;font-size:13px;">⚡ Rejoins vite, les places partent rapidement !</span>
+        Tu fais partie des élus ! Tu vas être redirigé vers le groupe privé
+        <strong>Stream Source</strong> sur WhatsApp.<br><br>
+        <span style="color:#f59e0b;font-size:13px;">⚡ Si la redirection ne s'est pas ouverte, clique ci-dessous.</span>
       </div>
-      <button class="btn-wa" id="btn-join" onclick="joinGroup()">
+      <button class="btn-wa" id="btn-join" onclick="window.open(WA_GROUP_LINK, '_blank')">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-        Rejoindre le groupe
+        Ouvrir le groupe WhatsApp
       </button>
-      <div class="wa-joined" id="wa-joined">✅ Tu as rejoint le groupe ! Bienvenue dans Stream Source 🎬</div>
-      <p class="wa-note" id="wa-note">Groupe privé — places limitées</p>
+      <p class="wa-note">Groupe privé — places limitées</p>
     </div>
   </div>
 </div>
@@ -332,22 +331,25 @@ const TOTAL_STEPS = 9;
 
 let itiInstance = null;
 let currentEntryId = null;
-let joinDone = false;
 let prenom = '';
 let currentStep = 1;
 let timerInterval = null;
 let deadline = null;
 const answers = {};
 
+// ── Scroll top propre sur mobile ─────────────────────────────────
+function scrollTop() {
+  setTimeout(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, 50);
+}
+
 // ── Timer ────────────────────────────────────────────────────────
 function startTimer(deadlineDate) {
   if (!deadlineDate) return;
   deadline = new Date(deadlineDate);
-
-  // Vérifie que la deadline est dans le futur
   if (new Date() >= deadline) return;
 
-  // Affiche le timer
   document.getElementById('timer-wrap').style.display = 'flex';
 
   function tick() {
@@ -421,7 +423,6 @@ async function checkAvailability() {
   try {
     const { data: config } = await sb.from('config').select('*').eq('id', 1).single();
 
-    // Deadline depuis Supabase
     if (config.deadline) {
       const dl = new Date(config.deadline);
       if (new Date() >= dl) { showStep('closed'); return; }
@@ -472,7 +473,7 @@ async function trackAbandon(step) {
 
 // ── Créer entrée dès Q1 ──────────────────────────────────────────
 async function createInitialEntry(prenomVal) {
-  if (currentEntryId) return; // déjà créé
+  if (currentEntryId) return;
   try {
     const { data: inserted } = await sb.from('reponses').insert({
       prenom: prenomVal,
@@ -495,7 +496,6 @@ async function nextStep(step) {
     if (!val) { document.getElementById('prenom').focus(); return; }
     prenom = val;
 
-    // Personnalisation des titres
     document.getElementById('q2-title').textContent =
       'Hey ' + prenom + ' ! Combien tu claques par mois en abonnements streaming ?';
     document.getElementById('q8-title').textContent =
@@ -505,7 +505,6 @@ async function nextStep(step) {
     document.getElementById('success-title').textContent =
       'Félicitations ' + prenom + ' ! 🎉';
 
-    // Création de l'entrée en base dès Q1
     await createInitialEntry(prenom);
   }
 
@@ -513,7 +512,7 @@ async function nextStep(step) {
   currentStep = step + 1;
   document.getElementById('step-' + currentStep).classList.add('active');
   updateProgress(currentStep);
-  window.scrollTo(0, 0);
+  scrollTop();
 }
 
 async function nextStepWithValidation(step, group) {
@@ -522,14 +521,13 @@ async function nextStepWithValidation(step, group) {
     return;
   }
 
-  // Mise à jour de l'étape d'abandon
   await trackAbandon(step + 1);
 
   document.getElementById('step-' + step).classList.remove('active');
   currentStep = step + 1;
   document.getElementById('step-' + currentStep).classList.add('active');
   updateProgress(currentStep);
-  window.scrollTo(0, 0);
+  scrollTop();
 }
 
 // ── Retour ───────────────────────────────────────────────────────
@@ -538,9 +536,8 @@ function goBack(step) {
   currentStep = step - 1;
   document.getElementById('step-' + currentStep).classList.add('active');
   updateProgress(currentStep);
-  window.scrollTo(0, 0);
+  scrollTop();
 
-  // Restaure la sélection visuelle si déjà répondu
   const groupMap = {2:'q2',3:'q3',4:'q4',5:'q5',6:'q6',7:'q7',8:'q8'};
   const group = groupMap[currentStep];
   if (group && answers[group]) {
@@ -575,7 +572,6 @@ async function submitForm() {
   if (!rawVal) { document.getElementById('whatsapp').focus(); return; }
   if (!isValidPhone()) { showPhoneError(); return; }
 
-  // Vérif deadline Supabase
   if (deadline && new Date() >= deadline) { showStep('closed'); return; }
 
   const fullNumber = itiInstance.getNumber();
@@ -587,7 +583,6 @@ async function submitForm() {
   try {
     const { data: config } = await sb.from('config').select('*').eq('id', 1).single();
 
-    // Revérif deadline depuis Supabase
     if (config.deadline && new Date() >= new Date(config.deadline)) {
       showStep('closed'); return;
     }
@@ -602,7 +597,7 @@ async function submitForm() {
       return;
     }
 
-    // Vérif doublon par numéro
+    // Vérif doublon
     const { data: existing } = await sb.from('reponses')
       .select('id').eq('whatsapp', fullNumber).limit(1);
 
@@ -613,7 +608,7 @@ async function submitForm() {
       return;
     }
 
-    // Mise à jour de l'entrée existante (créée à Q1)
+    // Mise à jour ou insertion
     if (currentEntryId) {
       await sb.from('reponses').update({
         whatsapp: fullNumber,
@@ -625,10 +620,11 @@ async function submitForm() {
         q7: answers.q7 || '',
         q8: answers.q8 || '',
         question: questionLibre,
+        statut: 'confirmé',
         etape_abandon: 0
       }).eq('id', currentEntryId);
     } else {
-      // Fallback : insertion directe si l'entrée Q1 a échoué
+      // Fallback si création Q1 a échoué
       const { data: inserted, error } = await sb.from('reponses').insert({
         prenom,
         whatsapp: fullNumber,
@@ -640,7 +636,7 @@ async function submitForm() {
         q7: answers.q7 || '',
         q8: answers.q8 || '',
         question: questionLibre,
-        statut: 'brouillon',
+        statut: 'confirmé',
         etape_abandon: 0
       }).select().single();
       if (error || !inserted) throw new Error('Insertion échouée');
@@ -648,37 +644,21 @@ async function submitForm() {
     }
 
     markAsSubmitted();
+
+    // Ouvre WhatsApp immédiatement — déclenché par le clic utilisateur
+    window.open(WA_GROUP_LINK, '_blank');
+
+    // Affiche la page succès avec le bouton fallback
     document.getElementById('step-9').classList.remove('active');
     document.getElementById('step-success').classList.add('active');
     updateProgress(TOTAL_STEPS);
-    window.scrollTo(0, 0);
+    scrollTop();
 
   } catch (e) {
     btn.disabled = false;
     btn.textContent = 'Rejoindre Stream Source 🚀';
     showFormError('❌ Une erreur est survenue. Vérifie ta connexion et réessaie.');
   }
-}
-
-// ── Rejoindre → statut confirmé ──────────────────────────────────
-async function joinGroup() {
-  if (joinDone) return;
-  joinDone = true;
-  const btn = document.getElementById('btn-join');
-  btn.disabled = true;
-  btn.textContent = 'Redirection...';
-
-  if (currentEntryId) {
-    sb.from('reponses')
-      .update({ statut: 'confirmé' })
-      .eq('id', currentEntryId)
-      .then(() => {});
-  }
-
-  window.open(WA_GROUP_LINK, '_blank');
-  document.getElementById('wa-joined').style.display = 'block';
-  document.getElementById('wa-note').style.display = 'none';
-  btn.style.display = 'none';
 }
 
 // ── Init ─────────────────────────────────────────────────────────
