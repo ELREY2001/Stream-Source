@@ -25,6 +25,8 @@
   .controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
   .limit-input { padding: 10px 14px; background: #111; border: 1px solid #2a2a2a; border-radius: 8px; font-size: 15px; color: #fff; font-family: inherit; outline: none; width: 100px; transition: border-color 0.15s; }
   .limit-input:focus { border-color: #6366f1; }
+  .deadline-input { padding: 10px 14px; background: #111; border: 1px solid #2a2a2a; border-radius: 8px; font-size: 14px; color: #fff; font-family: inherit; outline: none; transition: border-color 0.15s; }
+  .deadline-input:focus { border-color: #6366f1; }
   .btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.15s; }
   .btn-primary { background: #6366f1; color: #fff; }
   .btn-primary:hover { background: #4f46e5; }
@@ -86,6 +88,26 @@
   .login-btn:hover { background: #4f46e5; }
   .login-btn:disabled { opacity: 0.5; cursor: not-allowed; }
   .login-error { font-size: 13px; color: #f87171; margin-top: 0.75rem; display: none; }
+
+  /* Abandon stats */
+  .abandon-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+  .abandon-card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 1rem; text-align: center; }
+  .abandon-q { font-size: 11px; color: #6b7280; margin-bottom: 0.4rem; }
+  .abandon-count { font-size: 22px; font-weight: 700; color: #f59e0b; }
+  .abandon-pct { font-size: 11px; color: #4b5563; margin-top: 2px; }
+  .abandon-bar { height: 4px; background: #2a2a2a; border-radius: 2px; margin-top: 8px; }
+  .abandon-bar-fill { height: 100%; background: #f59e0b; border-radius: 2px; }
+
+  /* Notification */
+  .notif-wrap { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .notif-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+  .notif-on { background: rgba(52,211,153,0.1); color: #34d399; border: 1px solid rgba(52,211,153,0.3); }
+  .notif-off { background: rgba(107,114,128,0.1); color: #6b7280; border: 1px solid #2a2a2a; }
+
+  /* Filtre par réponse */
+  .response-filter { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
+  .response-filter select { padding: 8px 12px; background: #111; border: 1px solid #2a2a2a; border-radius: 8px; font-size: 13px; color: #fff; font-family: inherit; outline: none; cursor: pointer; }
+  .response-filter select:focus { border-color: #6366f1; }
 </style>
 </head>
 <body>
@@ -113,6 +135,7 @@
 
   <div id="alert-box" class="alert"></div>
 
+  <!-- Stats -->
   <div class="stats">
     <div class="stat-card">
       <div class="stat-label">✅ Confirmés (places prises)</div>
@@ -137,9 +160,12 @@
     </div>
   </div>
 
+  <!-- Paramètres -->
   <div class="section">
     <div class="section-title">⚙️ Paramètres</div>
     <div style="display:flex; flex-direction:column; gap:16px;">
+
+      <!-- Limite -->
       <div class="controls">
         <span style="font-size:14px;color:#9ca3af;">Limite :</span>
         <input type="number" class="limit-input" id="limit-input" min="1" value="30" />
@@ -149,6 +175,8 @@
         <button class="btn btn-outline" onclick="adjustLimit(+1)">+1</button>
         <button class="btn btn-outline" onclick="adjustLimit(+5)">+5</button>
       </div>
+
+      <!-- Formulaire actif -->
       <div class="toggle-wrap">
         <label class="toggle">
           <input type="checkbox" id="active-toggle" onchange="toggleActive()" checked />
@@ -156,25 +184,77 @@
         </label>
         <span class="toggle-label" id="toggle-label">Formulaire actif</span>
       </div>
+
+      <!-- Timer deadline -->
+      <div class="controls">
+        <span style="font-size:14px;color:#9ca3af;">⏳ Date de clôture :</span>
+        <input type="datetime-local" class="deadline-input" id="deadline-input" />
+        <button class="btn btn-primary" onclick="saveDeadline()">Enregistrer</button>
+        <button class="btn btn-danger btn-sm" onclick="clearDeadline()">Supprimer timer</button>
+      </div>
+      <div style="font-size:12px;color:#4b5563;" id="deadline-info">Aucune date de clôture définie</div>
+
+      <!-- Notification sonore -->
+      <div class="notif-wrap">
+        <span style="font-size:14px;color:#9ca3af;">🔔 Notification sonore :</span>
+        <span class="notif-badge" id="notif-badge">—</span>
+        <label class="toggle">
+          <input type="checkbox" id="notif-toggle" onchange="toggleNotif()" />
+          <span class="slider"></span>
+        </label>
+        <span class="toggle-label" id="notif-label">Son désactivé</span>
+        <button class="btn btn-outline btn-sm" onclick="testSound()">🔊 Tester</button>
+      </div>
     </div>
   </div>
 
+  <!-- Statistiques d'abandon -->
+  <div class="section">
+    <div class="section-title">📊 Statistiques d'abandon par question</div>
+    <div class="abandon-grid" id="abandon-grid">
+      <div style="color:#4b5563;font-size:13px;">Chargement...</div>
+    </div>
+  </div>
+
+  <!-- Réponses -->
   <div class="section">
     <div class="section-title">
       <span>📋 Réponses (<span id="count-label">0</span>)</span>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <button class="btn btn-success btn-sm" onclick="exportCSV()">Exporter CSV</button>
         <button class="btn btn-danger btn-sm" onclick="clearAll()">Tout effacer</button>
-        <button class="btn btn-outline btn-sm" onclick="loadData()">🔄 Actualiser</button>
+        <button class="btn btn-outline btn-sm" onclick="loadData()">↺ Actualiser</button>
       </div>
     </div>
+
+    <!-- Filtres statut -->
     <div class="filters">
       <button class="filter-btn active" onclick="setFilter('tous', this)">Tous</button>
       <button class="filter-btn" onclick="setFilter('confirmé', this)">✅ Confirmés</button>
       <button class="filter-btn" onclick="setFilter('brouillon', this)">⏳ Brouillons</button>
       <button class="filter-btn" onclick="setFilter('question', this)">💬 Avec question</button>
     </div>
-    <div class="table-wrap">
+
+    <!-- Filtre par réponse -->
+    <div class="response-filter">
+      <span style="font-size:13px;color:#6b7280;">Filtrer par réponse :</span>
+      <select id="filter-question" onchange="setResponseFilter()">
+        <option value="">— Toutes les questions —</option>
+        <option value="q2">Dépenses mensuelles</option>
+        <option value="q3">A coupé un abonnement</option>
+        <option value="q4">Intérêt prix mini</option>
+        <option value="q5">Intérêt business</option>
+        <option value="q6">Statut social</option>
+        <option value="q7">Entourage demande</option>
+        <option value="q8">Prêt à investir</option>
+      </select>
+      <select id="filter-value" onchange="renderTable()" style="min-width:200px;">
+        <option value="">— Toutes les réponses —</option>
+      </select>
+      <button class="btn btn-outline btn-sm" onclick="resetResponseFilter()">Réinitialiser</button>
+    </div>
+
+    <div class="table-wrap" style="margin-top:1rem;">
       <table>
         <thead>
           <tr>
@@ -190,12 +270,13 @@
             <th>Statut social</th>
             <th>Entourage</th>
             <th>Prêt</th>
+            <th>Abandon étape</th>
             <th>💬 Question</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody id="responses-body">
-          <tr><td colspan="14" class="empty"><div class="spinner"></div></td></tr>
+          <tr><td colspan="15" class="empty"><div class="spinner"></div></td></tr>
         </tbody>
       </table>
     </div>
@@ -207,33 +288,183 @@
 const SUPABASE_URL = 'https://vmggidzgzkbgrmyjllzv.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtZ2dpZHpnemtiZ3JteWpsbHp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyNzQzMTcsImV4cCI6MjEwMTg1MDMxN30.jRg4e9TlYrHgJUljT68i0aCtkYMZ8uMb3p5Itu3DpdE';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
 const WA_GROUP_LINK = 'https://chat.whatsapp.com/Lx6TtWQkNpzEmPk4mOcog8?s=cl&p=a&mlu=4';
 
-let currentConfig = { limite: 30, active: true };
+let currentConfig = { limite: 30, active: true, deadline: null };
 let allResponses = [];
 let currentFilter = 'tous';
+let currentResponseFilter = { question: '', value: '' };
 let autoRefreshInterval = null;
+let lastCount = 0;
+let soundEnabled = false;
+let audioCtx = null;
 
-// ── Auth via Supabase ────────────────────────────────────────────
+// ── Audio ────────────────────────────────────────────────────────
+function playNotifSound() {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const now = audioCtx.currentTime;
+    const osc1 = audioCtx.createOscillator();
+    const osc2 = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc1.connect(gain); osc2.connect(gain); gain.connect(audioCtx.destination);
+    osc1.frequency.setValueAtTime(880, now);
+    osc2.frequency.setValueAtTime(1100, now + 0.15);
+    gain.gain.setValueAtTime(0.3, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+    osc1.start(now); osc1.stop(now + 0.15);
+    osc2.start(now + 0.15); osc2.stop(now + 0.5);
+  } catch(e) {}
+}
+
+function testSound() { playNotifSound(); showAlert('🔊 Test du son !', 'success'); }
+
+function toggleNotif() {
+  soundEnabled = document.getElementById('notif-toggle').checked;
+  localStorage.setItem('ss_sound', soundEnabled ? '1' : '0');
+  updateNotifUI();
+  if (soundEnabled) playNotifSound();
+}
+
+function updateNotifUI() {
+  const badge = document.getElementById('notif-badge');
+  const label = document.getElementById('notif-label');
+  if (soundEnabled) {
+    badge.className = 'notif-badge notif-on';
+    badge.textContent = '🔔 Activé';
+    label.textContent = 'Son activé';
+  } else {
+    badge.className = 'notif-badge notif-off';
+    badge.textContent = '🔕 Désactivé';
+    label.textContent = 'Son désactivé';
+  }
+  document.getElementById('notif-toggle').checked = soundEnabled;
+}
+
+// ── Timer deadline ───────────────────────────────────────────────
+async function saveDeadline() {
+  const val = document.getElementById('deadline-input').value;
+  if (!val) { showAlert('Sélectionnez une date', 'danger'); return; }
+  const iso = new Date(val).toISOString();
+  await sb.from('config').update({ deadline: iso }).eq('id', 1);
+  showAlert('✅ Date de clôture enregistrée', 'success');
+  loadData();
+}
+
+async function clearDeadline() {
+  if (!confirm('Supprimer le timer du formulaire ?')) return;
+  await sb.from('config').update({ deadline: null }).eq('id', 1);
+  showAlert('Timer supprimé', 'success');
+  loadData();
+}
+
+function updateDeadlineUI(deadline) {
+  const info = document.getElementById('deadline-info');
+  const input = document.getElementById('deadline-input');
+  if (deadline) {
+    const d = new Date(deadline);
+    const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    input.value = local;
+    info.textContent = '⏳ Clôture prévue le ' + d.toLocaleString('fr-FR');
+    info.style.color = '#f59e0b';
+  } else {
+    input.value = '';
+    info.textContent = 'Aucune date de clôture définie';
+    info.style.color = '#4b5563';
+  }
+}
+
+// ── Abandon stats ────────────────────────────────────────────────
+function renderAbandonStats(responses) {
+  const questions = [
+    { key: 'q1', label: 'Q1 — Prénom' },
+    { key: 'q2', label: 'Q2 — Dépenses' },
+    { key: 'q3', label: 'Q3 — Coupé abo' },
+    { key: 'q4', label: 'Q4 — Intérêt prix' },
+    { key: 'q5', label: 'Q5 — Business' },
+    { key: 'q6', label: 'Q6 — Statut social' },
+    { key: 'q7', label: 'Q7 — Entourage' },
+    { key: 'q8', label: 'Q8 — Prêt' },
+  ];
+
+  const total = responses.length;
+  if (total === 0) {
+    document.getElementById('abandon-grid').innerHTML =
+      '<div style="color:#4b5563;font-size:13px;">Aucune donnée disponible</div>';
+    return;
+  }
+
+  // etape_abandon: 0 = a tout complété (pas un abandon)
+  // etape_abandon: 1 à 8 = abandonné à cette étape
+  const abandonCounts = {};
+  questions.forEach((q, i) => { abandonCounts[i + 1] = 0; });
+
+  responses.forEach(r => {
+    if (r.etape_abandon && r.etape_abandon > 0) {
+      abandonCounts[r.etape_abandon] = (abandonCounts[r.etape_abandon] || 0) + 1;
+    }
+  });
+
+  const maxAbandon = Math.max(...Object.values(abandonCounts), 1);
+
+  document.getElementById('abandon-grid').innerHTML = questions.map((q, i) => {
+    const step = i + 1;
+    const count = abandonCounts[step] || 0;
+    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+    const barWidth = Math.round((count / maxAbandon) * 100);
+    return `
+      <div class="abandon-card">
+        <div class="abandon-q">${q.label}</div>
+        <div class="abandon-count">${count}</div>
+        <div class="abandon-pct">${pct}% ont abandonné ici</div>
+        <div class="abandon-bar">
+          <div class="abandon-bar-fill" style="width:${barWidth}%"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ── Filtre par réponse ───────────────────────────────────────────
+function setResponseFilter() {
+  const q = document.getElementById('filter-question').value;
+  currentResponseFilter.question = q;
+  currentResponseFilter.value = '';
+  const valueSelect = document.getElementById('filter-value');
+  valueSelect.innerHTML = '<option value="">— Toutes les réponses —</option>';
+  if (q && allResponses.length > 0) {
+    const values = [...new Set(allResponses.map(r => r[q]).filter(v => v && v.trim()))];
+    values.forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v;
+      opt.textContent = v.length > 40 ? v.slice(0, 40) + '...' : v;
+      valueSelect.appendChild(opt);
+    });
+  }
+  renderTable();
+}
+
+function resetResponseFilter() {
+  document.getElementById('filter-question').value = '';
+  document.getElementById('filter-value').innerHTML = '<option value="">— Toutes les réponses —</option>';
+  currentResponseFilter = { question: '', value: '' };
+  renderTable();
+}
+
+// ── Auth ─────────────────────────────────────────────────────────
 async function checkPassword() {
   const input = document.getElementById('password-input').value;
   const errorEl = document.getElementById('login-error');
   if (!input) return;
-
   try {
-    const { data, error } = await sb
-      .from('admin_config')
-      .select('password')
-      .eq('id', 1)
-      .single();
-
+    const { data, error } = await sb.from('admin_config').select('password').eq('id', 1).single();
     if (error || !data) throw new Error('Erreur');
-
     if (input === data.password) {
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('admin-content').style.display = 'block';
       sessionStorage.setItem('ss_admin', 'true');
+      soundEnabled = localStorage.getItem('ss_sound') === '1';
+      updateNotifUI();
       startAutoRefresh();
       loadData();
     } else {
@@ -292,6 +523,13 @@ async function loadData() {
     const remaining = Math.max(0, config.limite - confirmes);
     const pct = config.limite > 0 ? Math.min(100, Math.round((confirmes / config.limite) * 100)) : 0;
 
+    // Notification son si nouvelle inscription
+    if (lastCount > 0 && allResponses.length > lastCount && soundEnabled) {
+      playNotifSound();
+      showAlert('🔔 Nouvelle inscription !', 'success');
+    }
+    lastCount = allResponses.length;
+
     document.getElementById('stat-confirmes').textContent = confirmes;
     document.getElementById('stat-brouillons').textContent = brouillons;
     document.getElementById('stat-limit').textContent = config.limite;
@@ -305,7 +543,10 @@ async function loadData() {
     document.getElementById('toggle-label').textContent = config.active ? 'Formulaire actif' : 'Formulaire désactivé';
     document.getElementById('count-label').textContent = allResponses.length;
 
+    updateDeadlineUI(config.deadline);
+    renderAbandonStats(allResponses);
     renderTable();
+
   } catch (e) {
     showAlert('Erreur de chargement', 'danger');
   }
@@ -317,14 +558,24 @@ function formatDate(d) {
 }
 
 function renderTable() {
+  const selectedValue = document.getElementById('filter-value') ?
+    document.getElementById('filter-value').value : '';
+
   let filtered = allResponses;
-  if (currentFilter === 'confirmé') filtered = allResponses.filter(r => r.statut === 'confirmé');
-  else if (currentFilter === 'brouillon') filtered = allResponses.filter(r => r.statut !== 'confirmé');
-  else if (currentFilter === 'question') filtered = allResponses.filter(r => r.question && r.question.trim() !== '');
+
+  // Filtre statut
+  if (currentFilter === 'confirmé') filtered = filtered.filter(r => r.statut === 'confirmé');
+  else if (currentFilter === 'brouillon') filtered = filtered.filter(r => r.statut !== 'confirmé');
+  else if (currentFilter === 'question') filtered = filtered.filter(r => r.question && r.question.trim() !== '');
+
+  // Filtre par réponse
+  if (currentResponseFilter.question && selectedValue) {
+    filtered = filtered.filter(r => r[currentResponseFilter.question] === selectedValue);
+  }
 
   const tbody = document.getElementById('responses-body');
   if (!filtered || filtered.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="14" class="empty">Aucune réponse</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="15" class="empty">Aucune réponse</td></tr>';
     return;
   }
 
@@ -335,10 +586,16 @@ function renderTable() {
       : '<span class="badge-brouillon">⏳ Brouillon</span>';
 
     const numClean = (r.whatsapp || '').replace(/\D/g, '');
+
     const msgRelance = encodeURIComponent(
-      `Salut ${r.prenom || ''} ! 👋\nJ'ai bien vu ta candidature pour Stream Source 💎\nTa place est toujours réservée mais les autres arrivent vite... 👀\nRejoins le groupe maintenant avant qu'il soit trop tard 👇\n${WA_GROUP_LINK}`
+      `Salut ${r.prenom || ''} ! 👋\nJ'ai bien vu ta candidature pour Stream Source 💎\nTa place est toujours réservée mais les autres arrivent vite... 👀\nRejoins le groupe maintenant avant qu'il soit trop tard 🔥\n${WA_GROUP_LINK}`
     );
     const waRelanceLink = `https://wa.me/${numClean}?text=${msgRelance}`;
+
+    // Affichage de l'étape d'abandon
+    const abandonLabel = r.etape_abandon === 0 || r.etape_abandon === null
+      ? '<span style="color:#34d399;font-size:11px;">Complété</span>'
+      : '<span style="color:#f59e0b;font-size:11px;">Étape ' + r.etape_abandon + '</span>';
 
     return `
       <tr>
@@ -346,7 +603,7 @@ function renderTable() {
         <td>${statusBadge}</td>
         <td style="color:#6b7280;white-space:nowrap;font-size:12px;">${formatDate(r.date)}</td>
         <td style="font-weight:600;">${r.prenom || '—'}</td>
-        <td><a class="wa-link" href="https://wa.me/${numClean}" target="_blank">${r.whatsapp || '—'}</a></td>
+        <td>${r.whatsapp ? `<a class="wa-link" href="https://wa.me/${numClean}" target="_blank">${r.whatsapp}</a>` : '—'}</td>
         <td style="font-size:12px;max-width:120px;">${r.q2 || '—'}</td>
         <td style="font-size:12px;">${r.q3 || '—'}</td>
         <td style="font-size:12px;">${r.q4 || '—'}</td>
@@ -354,10 +611,11 @@ function renderTable() {
         <td style="font-size:12px;">${r.q6 || '—'}</td>
         <td style="font-size:12px;">${r.q7 || '—'}</td>
         <td style="font-size:12px;">${r.q8 || '—'}</td>
+        <td style="text-align:center;">${abandonLabel}</td>
         <td class="question-cell">${r.question && r.question.trim() ? `💬 ${r.question}` : '<span style="color:#374151;">—</span>'}</td>
         <td>
           <div class="actions-cell">
-            ${!isConfirme ? `
+            ${!isConfirme && r.whatsapp ? `
               <a href="${waRelanceLink}" target="_blank">
                 <button class="btn btn-wa btn-sm">📲 Relancer</button>
               </a>
@@ -417,10 +675,12 @@ async function clearAll() {
 
 function exportCSV() {
   if (allResponses.length === 0) { showAlert('Aucune réponse à exporter', 'danger'); return; }
-  const headers = ['#','Statut','Date','Prénom','WhatsApp','Dépenses','Coupé abo','Intérêt prix','Business','Statut social','Entourage','Prêt','Question'];
+  const headers = ['#','Statut','Date','Prénom','WhatsApp','Dépenses','Coupé abo','Intérêt prix','Business','Statut social','Entourage','Prêt','Abandon étape','Question'];
   const rows = allResponses.map((r, i) => [
     i+1, r.statut || 'brouillon', formatDate(r.date),
-    r.prenom, r.whatsapp, r.q2, r.q3, r.q4, r.q5, r.q6, r.q7, r.q8, r.question
+    r.prenom, r.whatsapp, r.q2, r.q3, r.q4, r.q5, r.q6, r.q7, r.q8,
+    r.etape_abandon === 0 ? 'Complété' : (r.etape_abandon || ''),
+    r.question
   ].map(v => '"' + (v||'').toString().replace(/"/g,'""') + '"').join(','));
   const csv = [headers.join(','), ...rows].join('\n');
   const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
@@ -435,6 +695,8 @@ function exportCSV() {
 if (sessionStorage.getItem('ss_admin') === 'true') {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('admin-content').style.display = 'block';
+  soundEnabled = localStorage.getItem('ss_sound') === '1';
+  updateNotifUI();
   startAutoRefresh();
   loadData();
 }
